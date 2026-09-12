@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { NativeSelect } from "@/components/ui/native-select";
 import { useActionToast } from "@/hooks/use-action-toast";
 import { saveFeedTypeAction, type FeedTypeFormState } from "./actions";
+import { useTranslations } from "@/lib/i18n/client";
 
 const initialState: FeedTypeFormState = {};
 
@@ -37,6 +38,7 @@ export function FeedTypeForm({
     initialState,
   );
   useActionToast(state?.error);
+  const t = useTranslations();
 
   const [rows, setRows] = useState<RecipeRow[]>(() =>
     feedType && feedType.recipeItems.length > 0
@@ -61,30 +63,30 @@ export function FeedTypeForm({
       {feedType && <input type="hidden" name="id" value={feedType.id} />}
 
       <div className="space-y-2">
-        <Label htmlFor="nameEn">Name (English)</Label>
+        <Label htmlFor="nameEn">{t("feed.materials.nameEnLabel")}</Label>
         <Input
           id="nameEn"
           name="nameEn"
           required
           autoFocus
-          placeholder="e.g. Layer Feed"
+          placeholder={t("feed.types.namePlaceholder")}
           defaultValue={feedType?.nameEn}
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="nameSi">Name (Sinhala)</Label>
+        <Label htmlFor="nameSi">{t("feed.materials.nameSiLabel")}</Label>
         <Input
           id="nameSi"
           name="nameSi"
           lang="si"
-          placeholder="Optional for now"
+          placeholder={t("feed.common.optionalForNow")}
           defaultValue={feedType?.nameSi}
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="batchSizeKg">Batch Size (kg)</Label>
+        <Label htmlFor="batchSizeKg">{t("feed.types.batchSizeLabel")}</Label>
         <Input
           id="batchSizeKg"
           name="batchSizeKg"
@@ -92,18 +94,18 @@ export function FeedTypeForm({
           step="0.001"
           min="0"
           inputMode="decimal"
-          placeholder="e.g. 50"
+          placeholder={t("feed.types.batchSizePlaceholder")}
           required
           defaultValue={feedType?.batchSizeKg}
         />
         <p className="text-xs text-muted-foreground">
-          The ingredient quantities below are for one batch of this size.
+          {t("feed.types.batchSizeHelp")}
         </p>
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="defaultSellPricePerKg">
-          Default Sell Price (per KG)
+          {t("feed.common.defaultSellPricePerKgLabel")}
         </Label>
         <Input
           id="defaultSellPricePerKg"
@@ -117,11 +119,10 @@ export function FeedTypeForm({
       </div>
 
       <div className="space-y-2">
-        <Label>Ingredients (per batch)</Label>
+        <Label>{t("feed.types.ingredientsLabel")}</Label>
         {materials.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            No materials yet — add raw materials first before building a
-            recipe.
+            {t("feed.types.noMaterialsForRecipe")}
           </p>
         ) : (
           <div className="space-y-2">
@@ -134,7 +135,7 @@ export function FeedTypeForm({
                   className="flex-1"
                 >
                   <option value="" disabled>
-                    Select material
+                    {t("common.select", { item: t("common.material") })}
                   </option>
                   {materials.map((material) => (
                     <option key={material.id} value={material.id}>
@@ -157,7 +158,7 @@ export function FeedTypeForm({
                   type="button"
                   onClick={() => removeRow(row.key)}
                   className="shrink-0 text-muted-foreground hover:text-destructive"
-                  aria-label="Remove ingredient"
+                  aria-label={t("feed.types.removeIngredientAria")}
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -168,7 +169,7 @@ export function FeedTypeForm({
               onClick={addRow}
               className="text-sm text-primary underline underline-offset-2"
             >
-              + Add Ingredient
+              + {t("feed.types.addIngredientWord")}
             </button>
           </div>
         )}
@@ -182,7 +183,7 @@ export function FeedTypeForm({
 
       <Button type="submit" disabled={pending || materials.length === 0}>
         {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-        {pending ? "Saving…" : "Save Recipe"}
+        {pending ? t("common.saving") : t("feed.types.saveRecipe")}
       </Button>
     </form>
   );

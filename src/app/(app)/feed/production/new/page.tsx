@@ -1,8 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { BackLink } from "@/components/back-link";
+import { getT } from "@/lib/i18n/server";
 import { ProduceBatchForm } from "../produce-batch-form";
 
 export default async function NewProductionPage() {
+  const { t } = await getT();
   const feedTypes = await prisma.feedType.findMany({
     where: { isActive: true },
     orderBy: { nameEn: "asc" },
@@ -11,8 +13,8 @@ export default async function NewProductionPage() {
 
   return (
     <div className="space-y-4">
-      <BackLink href="/feed/production" label="Production" />
-      <h1 className="text-xl font-bold">Produce Feed Batch</h1>
+      <BackLink href="/feed/production" label={t("feed.production.navLabel")} />
+      <h1 className="text-xl font-bold">{t("feed.production.produceFeedBatchTitle")}</h1>
       <ProduceBatchForm
         feedTypes={feedTypes.map((ft) => ({
           id: ft.id,

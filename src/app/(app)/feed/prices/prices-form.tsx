@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useActionToast } from "@/hooks/use-action-toast";
+import { useTranslations } from "@/lib/i18n/client";
 import { updateSellingPricesAction, type UpdatePricesState } from "./actions";
 
 const initialState: UpdatePricesState = {};
@@ -55,22 +56,27 @@ export function PricesForm({
     initialState,
   );
   useActionToast(state?.error);
+  const t = useTranslations();
 
   return (
     <form action={formAction} className="space-y-6">
       <div className="space-y-3 rounded-lg border p-4">
-        <h2 className="font-semibold">Raw Materials (Rs. per kg)</h2>
+        <h2 className="font-semibold">{t("feed.prices.rawMaterialsHeader")}</h2>
         {materials.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No materials yet.</p>
+          <p className="text-sm text-muted-foreground">
+            {t("feed.common.noMaterialsShort")}
+          </p>
         ) : (
           materials.map((m) => <PriceRow key={m.id} item={m} prefix="material" />)
         )}
       </div>
 
       <div className="space-y-3 rounded-lg border p-4">
-        <h2 className="font-semibold">Feed Types (Rs. per kg)</h2>
+        <h2 className="font-semibold">{t("feed.prices.feedTypesHeader")}</h2>
         {feedTypes.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No feed types yet.</p>
+          <p className="text-sm text-muted-foreground">
+            {t("feed.common.noFeedTypesShort")}
+          </p>
         ) : (
           feedTypes.map((f) => <PriceRow key={f.id} item={f} prefix="feedType" />)
         )}
@@ -80,7 +86,7 @@ export function PricesForm({
 
       <Button type="submit" disabled={pending}>
         {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-        {pending ? "Saving…" : "Save All Prices"}
+        {pending ? t("common.saving") : t("feed.prices.saveAllPrices")}
       </Button>
     </form>
   );

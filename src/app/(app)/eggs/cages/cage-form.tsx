@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useActionToast } from "@/hooks/use-action-toast";
+import { useTranslations } from "@/lib/i18n/client";
 import { saveCageAction, type CageFormState } from "./actions";
 
 const initialState: CageFormState = {};
@@ -18,25 +19,28 @@ export function CageForm({
 }) {
   const [state, formAction, pending] = useActionState(saveCageAction, initialState);
   useActionToast(state?.error);
+  const t = useTranslations();
 
   return (
     <form action={formAction} className="max-w-md space-y-5">
       {cage && <input type="hidden" name="id" value={cage.id} />}
 
       <div className="space-y-2">
-        <Label htmlFor="name">Cage Name</Label>
+        <Label htmlFor="name">{t("eggs.cages.form.nameLabel")}</Label>
         <Input
           id="name"
           name="name"
           required
           autoFocus
-          placeholder="e.g. Cage 1"
+          placeholder={t("eggs.cages.form.namePlaceholder")}
           defaultValue={cage?.name}
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="currentChickenCount">Chicken Count</Label>
+        <Label htmlFor="currentChickenCount">
+          {t("eggs.cages.chickenCountLabel")}
+        </Label>
         <Input
           id="currentChickenCount"
           name="currentChickenCount"
@@ -56,7 +60,7 @@ export function CageForm({
 
       <Button type="submit" disabled={pending}>
         {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-        {pending ? "Saving…" : "Save Cage"}
+        {pending ? t("common.saving") : t("eggs.cages.form.save")}
       </Button>
     </form>
   );

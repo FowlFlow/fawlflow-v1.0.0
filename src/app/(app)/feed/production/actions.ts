@@ -5,14 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getRawMaterialStockKg, getLatestUnitCost } from "@/lib/stock";
-
-const produceBatchSchema = z.object({
-  feedTypeId: z.string().min(1, "Select a feed type"),
-  date: z.string().min(1, "Date is required"),
-  quantityProducedKg: z.coerce.number().positive("Quantity must be greater than 0"),
-  notes: z.string().trim().max(300).optional(),
-  confirmed: z.coerce.boolean().optional(),
-});
+import { getT } from "@/lib/i18n/server";
 
 export type ProduceBatchState = {
   error?: string;
@@ -35,6 +28,16 @@ export async function produceBatchAction(
   _prevState: ProduceBatchState,
   formData: FormData,
 ): Promise<ProduceBatchState> {
+  const { t } = await getT();
+
+  const produceBatchSchema = z.object({
+    feedTypeId: z.string().min(1, t("common.select", { item: t("feed.common.feedType") })),
+    date: z.string().min(1, t("feed.common.dateRequired")),
+    quantityProducedKg: z.coerce.number().positive(t("feed.common.quantityPositive")),
+    notes: z.string().trim().max(300).optional(),
+    confirmed: z.coerce.boolean().optional(),
+  });
+
   const parsed = produceBatchSchema.safeParse({
     feedTypeId: formData.get("feedTypeId"),
     date: formData.get("date"),
@@ -44,20 +47,20 @@ export async function produceBatchAction(
   });
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Please check the form." };
+    return { error: parsed.error.issues[0]?.message ?? t("feed.common.checkForm") };
   }
 
   const { feedTypeId, date, quantityProducedKg, notes, confirmed } = parsed.data;
 
   const feedType = await prisma.feedType.findUnique({ where: { id: feedTypeId } });
-  if (!feedType) return { error: "Feed type not found." };
+  if (!feedType) return { error: t("feed.common.feedTypeNotFound") };
 
   const recipeItems = await prisma.feedRecipeItem.findMany({
     where: { feedTypeId, deletedAt: null },
     include: { material: true },
   });
   if (recipeItems.length === 0) {
-    return { error: "This recipe has no ingredients yet. Edit it and add some first." };
+    return { error: t("feed.production.noIngredients") };
   }
 
   const scaleFactor = quantityProducedKg / feedType.batchSizeKg.toNumber();
@@ -82,7 +85,7 @@ export async function produceBatchAction(
   const missingCost = lines.find((line) => line.unitCostPerKg === null);
   if (missingCost) {
     return {
-      error: `No purchase history for ${missingCost.materialName} yet — record a purchase for it first so its cost is known.`,
+      error: t("feed.production.noPurchaseHistory", { name: missingCost.materialName }),
     };
   }
 
@@ -133,5 +136,5 @@ export async function produceBatchAction(
   revalidatePath("/feed/materials");
   revalidatePath("/feed/types");
   revalidatePath("/feed/production");
-  redirect(`/feed/production?flash=${encodeURIComponent("Batch produced.")}`);
+  redirect(`/feed/production?flash=${encodeURIComponent(t("feed.production.produced"))}`);
 }

@@ -10,89 +10,96 @@ import {
   PiggyBank,
 } from "lucide-react";
 import { HubLinkGrid } from "@/components/hub-links";
+import { getT } from "@/lib/i18n/server";
+import type { Translate } from "@/lib/i18n/translate";
 
-const GROUPS = [
-  {
-    title: "Inventory",
-    links: [
-      {
-        href: "/feed/materials",
-        label: "Materials",
-        description: "Stock levels and prices",
-        icon: Package,
-      },
-      {
-        href: "/feed/purchases",
-        label: "Purchases",
-        description: "What you've bought",
-        icon: ShoppingCart,
-      },
-      {
-        href: "/feed/prices",
-        label: "Prices",
-        description: "Update selling prices",
-        icon: Tag,
-      },
-    ],
-  },
-  {
-    title: "Making Feed",
-    links: [
-      {
-        href: "/feed/types",
-        label: "Recipes",
-        description: "What goes into each feed",
-        icon: FlaskConical,
-      },
-      {
-        href: "/feed/production",
-        label: "Production",
-        description: "Batches you've made",
-        icon: Factory,
-      },
-    ],
-  },
-  {
-    title: "Selling & Using",
-    links: [
-      {
-        href: "/feed/sales",
-        label: "Sales",
-        description: "Feed and material sold",
-        icon: TrendingUp,
-      },
-      {
-        href: "/feed/usage",
-        label: "Farm Use",
-        description: "Feed used on the farm",
-        icon: Tractor,
-      },
-    ],
-  },
-  {
-    title: "Reports",
-    links: [
-      {
-        href: "/feed/reports",
-        label: "Cost & Stock",
-        description: "Daily production cost and stock summary",
-        icon: BarChart3,
-      },
-      {
-        href: "/feed/reports/profit",
-        label: "Profit",
-        description: "Profit from material and feed sales",
-        icon: PiggyBank,
-      },
-    ],
-  },
-];
+function buildGroups(t: Translate) {
+  return [
+    {
+      title: t("feed.hub.groupInventory"),
+      links: [
+        {
+          href: "/feed/materials",
+          label: t("feed.materials.navLabel"),
+          description: t("feed.hub.materialsDesc"),
+          icon: Package,
+        },
+        {
+          href: "/feed/purchases",
+          label: t("feed.purchases.navLabel"),
+          description: t("feed.hub.purchasesDesc"),
+          icon: ShoppingCart,
+        },
+        {
+          href: "/feed/prices",
+          label: t("feed.prices.navLabel"),
+          description: t("feed.hub.pricesDesc"),
+          icon: Tag,
+        },
+      ],
+    },
+    {
+      title: t("feed.hub.groupMakingFeed"),
+      links: [
+        {
+          href: "/feed/types",
+          label: t("feed.types.navLabel"),
+          description: t("feed.hub.recipesDesc"),
+          icon: FlaskConical,
+        },
+        {
+          href: "/feed/production",
+          label: t("feed.production.navLabel"),
+          description: t("feed.hub.productionDesc"),
+          icon: Factory,
+        },
+      ],
+    },
+    {
+      title: t("feed.hub.groupSellingUsing"),
+      links: [
+        {
+          href: "/feed/sales",
+          label: t("feed.sales.navLabel"),
+          description: t("feed.hub.salesDesc"),
+          icon: TrendingUp,
+        },
+        {
+          href: "/feed/usage",
+          label: t("feed.usage.navLabel"),
+          description: t("feed.hub.usageDesc"),
+          icon: Tractor,
+        },
+      ],
+    },
+    {
+      title: t("feed.reports.title"),
+      links: [
+        {
+          href: "/feed/reports",
+          label: t("feed.hub.reportsCostLabel"),
+          description: t("feed.hub.reportsCostDesc"),
+          icon: BarChart3,
+        },
+        {
+          href: "/feed/reports/profit",
+          label: t("feed.reports.profitNavLabel"),
+          description: t("feed.hub.profitDesc"),
+          icon: PiggyBank,
+        },
+      ],
+    },
+  ];
+}
 
-export default function FeedHubPage() {
+export default async function FeedHubPage() {
+  const { t } = await getT();
+  const groups = buildGroups(t);
+
   return (
     <div className="space-y-6">
-      <h1 className="text-xl font-bold">Feed</h1>
-      {GROUPS.map((group) => (
+      <h1 className="text-xl font-bold">{t("feed.hub.title")}</h1>
+      {groups.map((group) => (
         <div key={group.title}>
           <h2 className="mb-2 text-sm font-medium text-muted-foreground">
             {group.title}

@@ -13,13 +13,14 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { SectionNav } from "@/components/section-nav";
-
-const NAV_ITEMS = [
-  { href: "/feed/materials", label: "Materials" },
-  { href: "/feed/purchases", label: "Purchases" },
-];
+import { getT } from "@/lib/i18n/server";
 
 export default async function MaterialsPage() {
+  const { t } = await getT();
+  const NAV_ITEMS = [
+    { href: "/feed/materials", label: t("feed.materials.navLabel") },
+    { href: "/feed/purchases", label: t("feed.purchases.navLabel") },
+  ];
   const materials = await prisma.rawMaterial.findMany({
     where: { isActive: true },
     orderBy: { nameEn: "asc" },
@@ -31,28 +32,28 @@ export default async function MaterialsPage() {
 
   return (
     <div className="flex h-full flex-col space-y-4">
-      <SectionNav items={NAV_ITEMS} backHref="/feed" backLabel="Feed" />
+      <SectionNav items={NAV_ITEMS} backHref="/feed" backLabel={t("feed.hub.title")} />
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-xl font-bold">Feed Materials</h1>
+        <h1 className="text-xl font-bold">{t("feed.materials.title")}</h1>
         <div className="flex gap-2">
           <Link
             href="/feed/purchases/new"
             className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
           >
-            + Record Purchase
+            + {t("feed.purchases.recordPurchase")}
           </Link>
           <Link
             href="/feed/materials/new"
             className={cn(buttonVariants({ size: "sm" }))}
           >
-            + Add Material
+            + {t("feed.materials.addNew")}
           </Link>
         </div>
       </div>
 
       {materials.length === 0 ? (
         <p className="text-muted-foreground">
-          No materials yet. Add your first raw material to get started.
+          {t("feed.materials.emptyState")}
         </p>
       ) : (
         <>
@@ -71,7 +72,7 @@ export default async function MaterialsPage() {
                   </p>
                   <Link
                     href={`/feed/materials/${material.id}/edit`}
-                    aria-label="Edit material"
+                    aria-label={t("feed.materials.editTitle")}
                     className={cn(
                       buttonVariants({ variant: "ghost", size: "icon-lg" }),
                       "shrink-0 text-muted-foreground",
@@ -89,7 +90,7 @@ export default async function MaterialsPage() {
                     {stocks[i].toLocaleString(undefined, {
                       maximumFractionDigits: 2,
                     })}{" "}
-                    kg in stock
+                    kg {t("feed.common.inStockSuffix")}
                   </span>
                   <span className="text-muted-foreground">
                     Rs. {material.defaultSellPricePerKg.toString()}/kg
@@ -104,9 +105,9 @@ export default async function MaterialsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Current Stock</TableHead>
-                  <TableHead>Default Sell Price</TableHead>
+                  <TableHead>{t("common.name")}</TableHead>
+                  <TableHead>{t("feed.materials.currentStockHeader")}</TableHead>
+                  <TableHead>{t("feed.materials.defaultSellPriceHeader")}</TableHead>
                   <TableHead />
                 </TableRow>
               </TableHeader>
@@ -135,7 +136,7 @@ export default async function MaterialsPage() {
                     <TableCell>
                       <Link
                         href={`/feed/materials/${material.id}/edit`}
-                        aria-label="Edit material"
+                        aria-label={t("feed.materials.editTitle")}
                         className={cn(
                           buttonVariants({ variant: "ghost", size: "icon-lg" }),
                           "text-muted-foreground",

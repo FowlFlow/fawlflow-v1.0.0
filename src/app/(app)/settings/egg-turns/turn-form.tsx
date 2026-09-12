@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useActionToast } from "@/hooks/use-action-toast";
+import { useTranslations } from "@/lib/i18n/client";
 import { saveTurnAction, type TurnFormState } from "./actions";
 
 const initialState: TurnFormState = {};
@@ -21,25 +22,26 @@ export function TurnForm({
     initialState,
   );
   useActionToast(state?.error);
+  const t = useTranslations();
 
   return (
     <form action={formAction} className="max-w-md space-y-5">
       {turn && <input type="hidden" name="id" value={turn.id} />}
 
       <div className="space-y-2">
-        <Label htmlFor="name">Turn Name</Label>
+        <Label htmlFor="name">{t("settings.eggTurns.form.name")}</Label>
         <Input
           id="name"
           name="name"
           required
           autoFocus
-          placeholder="e.g. Morning"
+          placeholder={t("settings.eggTurns.form.namePlaceholder")}
           defaultValue={turn?.name}
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="sortOrder">Order</Label>
+        <Label htmlFor="sortOrder">{t("settings.eggTurns.order")}</Label>
         <Input
           id="sortOrder"
           name="sortOrder"
@@ -49,7 +51,7 @@ export function TurnForm({
           defaultValue={turn?.sortOrder ?? 0}
         />
         <p className="text-xs text-muted-foreground">
-          Lower numbers show first on the Log Eggs screen.
+          {t("settings.eggTurns.form.orderHint")}
         </p>
       </div>
 
@@ -61,7 +63,7 @@ export function TurnForm({
 
       <Button type="submit" disabled={pending}>
         {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-        {pending ? "Saving…" : "Save Turn"}
+        {pending ? t("common.saving") : t("settings.eggTurns.form.submit")}
       </Button>
     </form>
   );

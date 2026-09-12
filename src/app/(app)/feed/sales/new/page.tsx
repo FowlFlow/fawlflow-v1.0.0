@@ -1,8 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { BackLink } from "@/components/back-link";
+import { getT } from "@/lib/i18n/server";
 import { SaleForm } from "../sale-form";
 
 export default async function NewSalePage() {
+  const { t } = await getT();
   const [feedTypes, materials, buyers] = await Promise.all([
     prisma.feedType.findMany({
       where: { isActive: true },
@@ -23,8 +25,8 @@ export default async function NewSalePage() {
 
   return (
     <div className="space-y-4">
-      <BackLink href="/feed/sales" label="Sales" />
-      <h1 className="text-xl font-bold">Record Sale</h1>
+      <BackLink href="/feed/sales" label={t("feed.sales.navLabel")} />
+      <h1 className="text-xl font-bold">{t("feed.sales.recordSale")}</h1>
       <SaleForm
         feedTypes={feedTypes.map((f) => ({
           id: f.id,

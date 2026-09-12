@@ -16,11 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ProfitChart, type ProfitPoint } from "@/components/charts/profit-chart";
-
-const NAV_ITEMS = [
-  { href: "/feed/reports", label: "Cost" },
-  { href: "/feed/reports/profit", label: "Profit" },
-];
+import { getT } from "@/lib/i18n/server";
 
 type Granularity = "day" | "week" | "month" | "year";
 
@@ -122,6 +118,11 @@ function buildBuckets(
 export default async function ProfitReportPage(
   props: PageProps<"/feed/reports/profit">,
 ) {
+  const { t } = await getT();
+  const NAV_ITEMS = [
+    { href: "/feed/reports", label: t("feed.reports.navLabel") },
+    { href: "/feed/reports/profit", label: t("feed.reports.profitNavLabel") },
+  ];
   const searchParams = await props.searchParams;
   const granularity = parseGranularity(
     typeof searchParams.granularity === "string" ? searchParams.granularity : undefined,
@@ -179,18 +180,18 @@ export default async function ProfitReportPage(
 
   return (
     <div className="space-y-6">
-      <SectionNav items={NAV_ITEMS} backHref="/feed" backLabel="Feed" />
+      <SectionNav items={NAV_ITEMS} backHref="/feed" backLabel={t("feed.hub.title")} />
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-xl font-bold">Profit</h1>
+        <h1 className="text-xl font-bold">{t("feed.reports.profitNavLabel")}</h1>
         <Suspense fallback={null}>
           <SegmentedFilter
             param="granularity"
             current={granularity}
             options={[
-              { value: "day", label: "Day" },
-              { value: "week", label: "Week" },
-              { value: "month", label: "Month" },
-              { value: "year", label: "Year" },
+              { value: "day", label: t("feed.reports.day") },
+              { value: "week", label: t("feed.reports.week") },
+              { value: "month", label: t("feed.reports.month") },
+              { value: "year", label: t("feed.reports.year") },
             ]}
           />
         </Suspense>
@@ -200,7 +201,7 @@ export default async function ProfitReportPage(
         <input type="hidden" name="granularity" value={granularity} />
         <div className="space-y-1">
           <label htmlFor="from" className="text-sm font-medium">
-            From
+            {t("feed.reports.fromLabel")}
           </label>
           <input
             type="date"
@@ -212,7 +213,7 @@ export default async function ProfitReportPage(
         </div>
         <div className="space-y-1">
           <label htmlFor="to" className="text-sm font-medium">
-            To
+            {t("feed.reports.toLabel")}
           </label>
           <input
             type="date"
@@ -224,7 +225,7 @@ export default async function ProfitReportPage(
         </div>
         <button
           type="submit"
-          aria-label="Apply date range"
+          aria-label={t("feed.reports.applyDateRangeAria")}
           className={cn(buttonVariants({ variant: "outline", size: "icon-lg" }))}
         >
           <Search />
@@ -246,9 +247,9 @@ export default async function ProfitReportPage(
             {totalProfit.toLocaleString(undefined, { maximumFractionDigits: 2 })}
           </p>
           <p className="mb-4 text-sm text-muted-foreground">
-            Material sales: Rs.{" "}
+            {t("feed.reports.materialSalesLabel")} Rs.{" "}
             {materialTotal.toLocaleString(undefined, { maximumFractionDigits: 2 })}{" "}
-            · Feed sales: Rs.{" "}
+            · {t("feed.reports.feedSalesLabel")} Rs.{" "}
             {feedTotal.toLocaleString(undefined, { maximumFractionDigits: 2 })}
           </p>
           <ProfitChart data={chartData} />
@@ -257,11 +258,11 @@ export default async function ProfitReportPage(
 
       <div className="space-y-3">
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-          Profit by Item
+          {t("feed.reports.profitByItemHeader")}
         </h2>
         {itemRows.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            No sales in this period yet.
+            {t("feed.reports.noSalesPeriod")}
           </p>
         ) : (
           <>
@@ -273,7 +274,9 @@ export default async function ProfitReportPage(
                     <div className="flex items-center gap-2">
                       <p className="font-medium">{item.name}</p>
                       <Badge variant="secondary">
-                        {item.source === "feed" ? "Feed" : "Material"}
+                        {item.source === "feed"
+                          ? t("feed.common.feedBadge")
+                          : t("common.material")}
                       </Badge>
                     </div>
                     <p
@@ -293,10 +296,10 @@ export default async function ProfitReportPage(
                       {item.quantityKg.toLocaleString(undefined, {
                         maximumFractionDigits: 1,
                       })}{" "}
-                      kg sold
+                      kg {t("feed.reports.soldSuffix")}
                     </span>
                     <span>
-                      Revenue: Rs.{" "}
+                      {t("feed.reports.revenue")}: Rs.{" "}
                       {item.revenue.toLocaleString(undefined, {
                         maximumFractionDigits: 2,
                       })}
@@ -311,11 +314,11 @@ export default async function ProfitReportPage(
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Item</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Kg Sold</TableHead>
-                    <TableHead>Revenue</TableHead>
-                    <TableHead>Profit</TableHead>
+                    <TableHead>{t("feed.sales.itemHeader")}</TableHead>
+                    <TableHead>{t("feed.sales.typeHeader")}</TableHead>
+                    <TableHead>{t("feed.reports.kgSoldHeader")}</TableHead>
+                    <TableHead>{t("feed.reports.revenue")}</TableHead>
+                    <TableHead>{t("feed.reports.profitNavLabel")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -324,7 +327,9 @@ export default async function ProfitReportPage(
                       <TableCell className="font-medium">{item.name}</TableCell>
                       <TableCell>
                         <Badge variant="secondary">
-                          {item.source === "feed" ? "Feed" : "Material"}
+                          {item.source === "feed"
+                            ? t("feed.common.feedBadge")
+                            : t("common.material")}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -359,8 +364,7 @@ export default async function ProfitReportPage(
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Profit is based on sales only — feed used on the farm isn&apos;t a
-        sale, so it isn&apos;t counted here.
+        {t("feed.reports.profitFooterNote")}
       </p>
     </div>
   );

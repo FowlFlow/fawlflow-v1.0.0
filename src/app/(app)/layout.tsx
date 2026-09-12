@@ -4,11 +4,14 @@ import { LogOut } from "lucide-react";
 import { auth, signOut } from "@/auth";
 import { AppNav } from "@/components/app-nav";
 import { FlashToast } from "@/components/flash-toast";
+import { LanguageToggle } from "@/components/language-toggle";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { getT } from "@/lib/i18n/server";
 
 export default async function AppLayout({ children }: LayoutProps<"/">) {
   const session = await auth();
+  const { t } = await getT();
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden">
@@ -20,7 +23,8 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
           <Image src="/logo-icon.svg" alt="" width={28} height={26} />
           <span className="text-lg font-bold">FowlFlow</span>
         </div>
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <LanguageToggle />
           <span className="hidden sm:inline">{session?.user?.name}</span>
           <form
             action={async () => {
@@ -30,7 +34,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
           >
             <button
               type="submit"
-              aria-label="Sign out"
+              aria-label={t("common.signOut")}
               className={cn(
                 buttonVariants({ variant: "ghost", size: "icon-lg" }),
                 "text-muted-foreground",

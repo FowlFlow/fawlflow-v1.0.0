@@ -4,16 +4,7 @@ import { z } from "zod";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-
-const purchaseSchema = z.object({
-  materialId: z.string().min(1, "Select a material"),
-  supplierId: z.string().min(1, "Select a supplier"),
-  date: z.string().min(1, "Date is required"),
-  enteredUnit: z.enum(["KG", "TON"]),
-  enteredQuantity: z.coerce.number().positive("Quantity must be greater than 0"),
-  totalCost: z.coerce.number().min(0, "Total cost can't be negative"),
-  notes: z.string().trim().max(300).optional(),
-});
+import { getT } from "@/lib/i18n/server";
 
 export type PurchaseFormState = { error?: string };
 
@@ -21,6 +12,18 @@ export async function recordPurchaseAction(
   _prevState: PurchaseFormState,
   formData: FormData,
 ): Promise<PurchaseFormState> {
+  const { t } = await getT();
+
+  const purchaseSchema = z.object({
+    materialId: z.string().min(1, t("common.select", { item: t("common.material") })),
+    supplierId: z.string().min(1, t("common.select", { item: t("common.supplier") })),
+    date: z.string().min(1, t("feed.common.dateRequired")),
+    enteredUnit: z.enum(["KG", "TON"]),
+    enteredQuantity: z.coerce.number().positive(t("feed.common.quantityPositive")),
+    totalCost: z.coerce.number().min(0, t("feed.purchases.totalCostNegative")),
+    notes: z.string().trim().max(300).optional(),
+  });
+
   const parsed = purchaseSchema.safeParse({
     materialId: formData.get("materialId"),
     supplierId: formData.get("supplierId"),
@@ -32,7 +35,7 @@ export async function recordPurchaseAction(
   });
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Please check the form." };
+    return { error: parsed.error.issues[0]?.message ?? t("feed.common.checkForm") };
   }
 
   const {
@@ -46,10 +49,10 @@ export async function recordPurchaseAction(
   } = parsed.data;
 
   const material = await prisma.rawMaterial.findUnique({ where: { id: materialId } });
-  if (!material) return { error: "Material not found." };
+  if (!material) return { error: t("feed.common.materialNotFound") };
 
   const supplier = await prisma.contact.findUnique({ where: { id: supplierId } });
-  if (!supplier) return { error: "Supplier not found." };
+  if (!supplier) return { error: t("feed.purchases.supplierNotFound") };
 
   const quantityKg = enteredUnit === "TON" ? enteredQuantity * 1000 : enteredQuantity;
   const unitCostPerKg = totalCost / quantityKg;
@@ -79,5 +82,5 @@ export async function recordPurchaseAction(
 
   revalidatePath("/feed/materials");
   revalidatePath("/feed/purchases");
-  redirect(`/feed/purchases?flash=${encodeURIComponent("Purchase recorded.")}`);
+  redirect(`/feed/purchases?flash=${encodeURIComponent(t("feed.purchases.recorded"))}`);
 }

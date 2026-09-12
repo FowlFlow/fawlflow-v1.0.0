@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Poppins, Noto_Sans_Sinhala } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
+import { getLocale } from "@/lib/i18n/server";
+import { LocaleProvider } from "@/lib/i18n/client";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -20,15 +22,19 @@ export const metadata: Metadata = {
   description: "Feed and farm management for your poultry farm",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const locale = await getLocale();
+
   return (
     <html
-      lang="en"
+      lang={locale}
       className={`${poppins.variable} ${notoSansSinhala.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        {children}
-        <Toaster />
+        <LocaleProvider locale={locale}>
+          {children}
+          <Toaster />
+        </LocaleProvider>
       </body>
     </html>
   );

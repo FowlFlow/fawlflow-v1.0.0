@@ -5,13 +5,14 @@ import { getFeedStockKg } from "@/lib/stock";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { SectionNav } from "@/components/section-nav";
-
-const NAV_ITEMS = [
-  { href: "/feed/types", label: "Recipes" },
-  { href: "/feed/production", label: "Production" },
-];
+import { getT } from "@/lib/i18n/server";
 
 export default async function FeedTypesPage() {
+  const { t } = await getT();
+  const NAV_ITEMS = [
+    { href: "/feed/types", label: t("feed.types.navLabel") },
+    { href: "/feed/production", label: t("feed.production.navLabel") },
+  ];
   const feedTypes = await prisma.feedType.findMany({
     where: { isActive: true },
     orderBy: { nameEn: "asc" },
@@ -29,21 +30,19 @@ export default async function FeedTypesPage() {
 
   return (
     <div className="flex h-full flex-col space-y-4">
-      <SectionNav items={NAV_ITEMS} backHref="/feed" backLabel="Feed" />
+      <SectionNav items={NAV_ITEMS} backHref="/feed" backLabel={t("feed.hub.title")} />
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-xl font-bold">Feed Recipes</h1>
+        <h1 className="text-xl font-bold">{t("feed.types.title")}</h1>
         <Link
           href="/feed/types/new"
           className={cn(buttonVariants({ size: "sm" }))}
         >
-          + Add Recipe
+          + {t("feed.types.addNew")}
         </Link>
       </div>
 
       {feedTypes.length === 0 ? (
-        <p className="text-muted-foreground">
-          No feed recipes yet. Create one to start producing feed.
-        </p>
+        <p className="text-muted-foreground">{t("feed.types.emptyState")}</p>
       ) : (
         <div className="flex-1 space-y-3 overflow-y-auto">
           {feedTypes.map((feedType, i) => (
@@ -59,8 +58,10 @@ export default async function FeedTypesPage() {
                     )}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Batch size: {feedType.batchSizeKg.toString()} kg · Sell
-                    price: Rs. {feedType.defaultSellPricePerKg.toString()}/kg
+                    {t("feed.types.batchAndPrice", {
+                      size: feedType.batchSizeKg.toString(),
+                      price: feedType.defaultSellPricePerKg.toString(),
+                    })}
                   </p>
                 </div>
                 <div className="text-right">
@@ -73,11 +74,11 @@ export default async function FeedTypesPage() {
                     {stocks[i].toLocaleString(undefined, {
                       maximumFractionDigits: 2,
                     })}{" "}
-                    kg in stock
+                    kg {t("feed.common.inStockSuffix")}
                   </p>
                   <Link
                     href={`/feed/types/${feedType.id}/edit`}
-                    aria-label="Edit recipe"
+                    aria-label={t("feed.types.editTitle")}
                     className={cn(
                       buttonVariants({ variant: "ghost", size: "icon-lg" }),
                       "text-muted-foreground",

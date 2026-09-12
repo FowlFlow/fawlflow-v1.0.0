@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { NativeSelect } from "@/components/ui/native-select";
 import { useActionToast } from "@/hooks/use-action-toast";
 import { logFeedUsageAction, type UsageFormState } from "./actions";
+import { useTranslations } from "@/lib/i18n/client";
 
 const initialState: UsageFormState = {};
 
@@ -22,6 +23,7 @@ export function UsageForm({
     initialState,
   );
   useActionToast(state?.error);
+  const t = useTranslations();
   const today = new Date().toISOString().slice(0, 10);
 
   if (state?.needsConfirmation && state.formValues) {
@@ -41,9 +43,12 @@ export function UsageForm({
           <AlertDescription>
             {state.shortage && (
               <p>
-                {state.shortage.itemName}: using {state.shortage.requestedKg} kg
-                but only {state.shortage.availableKg.toFixed(2)} kg in stock (
-                {state.shortage.resultingKg.toFixed(2)} kg after this)
+                {t("feed.usage.shortageMsg", {
+                  name: state.shortage.itemName,
+                  requested: state.shortage.requestedKg,
+                  available: state.shortage.availableKg.toFixed(2),
+                  resulting: state.shortage.resultingKg.toFixed(2),
+                })}
               </p>
             )}
           </AlertDescription>
@@ -51,7 +56,7 @@ export function UsageForm({
 
         <Button type="submit" variant="destructive" disabled={pending}>
           {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-          {pending ? "Logging…" : "Log Anyway"}
+          {pending ? t("feed.usage.logging") : t("feed.usage.logAnyway")}
         </Button>
       </form>
     );
@@ -60,15 +65,15 @@ export function UsageForm({
   return (
     <form action={formAction} className="max-w-lg space-y-5">
       <div className="space-y-2">
-        <Label htmlFor="feedTypeId">Feed Type</Label>
+        <Label htmlFor="feedTypeId">{t("feed.common.feedType")}</Label>
         {feedTypes.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            No recipes yet — create one first.
+            {t("feed.production.noRecipes")}
           </p>
         ) : (
           <NativeSelect id="feedTypeId" name="feedTypeId" required defaultValue="">
             <option value="" disabled>
-              Select a feed type
+              {t("feed.usage.selectFeedType")}
             </option>
             {feedTypes.map((feedType) => (
               <option key={feedType.id} value={feedType.id}>
@@ -80,12 +85,12 @@ export function UsageForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="date">Date</Label>
+        <Label htmlFor="date">{t("common.date")}</Label>
         <Input id="date" name="date" type="date" required defaultValue={today} />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="quantityKg">Quantity Used (kg)</Label>
+        <Label htmlFor="quantityKg">{t("feed.usage.quantityUsedLabel")}</Label>
         <Input
           id="quantityKg"
           name="quantityKg"
@@ -98,8 +103,8 @@ export function UsageForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="notes">Notes</Label>
-        <Input id="notes" name="notes" placeholder="e.g. which cage" />
+        <Label htmlFor="notes">{t("common.notes")}</Label>
+        <Input id="notes" name="notes" placeholder={t("feed.usage.notesPlaceholder")} />
       </div>
 
       {state?.error && (
@@ -110,7 +115,7 @@ export function UsageForm({
 
       <Button type="submit" disabled={pending || feedTypes.length === 0}>
         {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-        {pending ? "Logging…" : "Log Farm Use"}
+        {pending ? t("feed.usage.logging") : t("feed.usage.logNew")}
       </Button>
     </form>
   );

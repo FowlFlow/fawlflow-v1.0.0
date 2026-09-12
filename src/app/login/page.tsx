@@ -1,7 +1,10 @@
 import Image from "next/image";
 import { LoginForm } from "./login-form";
+import { getT } from "@/lib/i18n/server";
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const { t } = await getT();
+
   return (
     <div className="flex min-h-screen w-full">
       <div className="hidden items-center justify-center bg-white p-12 md:flex md:w-1/2 lg:w-3/5">
@@ -21,7 +24,7 @@ export default function LoginPage() {
             <span className="text-2xl font-bold">FowlFlow</span>
           </div>
           <h1 className="mb-6 text-2xl font-bold text-primary">
-            Get Started Now
+            {t("auth.getStarted")}
           </h1>
           <LoginForm />
         </div>

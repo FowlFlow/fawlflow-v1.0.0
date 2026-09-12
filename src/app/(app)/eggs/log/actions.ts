@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { getT } from "@/lib/i18n/server";
 
 export type EggLogFormState = { error?: string; success?: boolean };
 
@@ -9,9 +10,10 @@ export async function saveEggLogAction(
   _prevState: EggLogFormState,
   formData: FormData,
 ): Promise<EggLogFormState> {
+  const { t } = await getT();
   const date = formData.get("date");
   if (typeof date !== "string" || !date) {
-    return { error: "Missing date." };
+    return { error: t("eggs.log.missingDate") };
   }
   const parsedDate = new Date(date);
 
@@ -20,7 +22,7 @@ export async function saveEggLogAction(
     prisma.eggTurn.findMany({ where: { isActive: true }, select: { id: true } }),
   ]);
   const cageIds = new Set(cages.map((c) => c.id));
-  const turnIds = new Set(turns.map((t) => t.id));
+  const turnIds = new Set(turns.map((turn) => turn.id));
 
   const updates: { cageId: string; turnId: string; eggCount: number }[] = [];
 
@@ -37,7 +39,7 @@ export async function saveEggLogAction(
   }
 
   if (updates.length === 0) {
-    return { error: "Enter at least one egg count." };
+    return { error: t("eggs.log.enterAtLeastOne") };
   }
 
   await prisma.$transaction(

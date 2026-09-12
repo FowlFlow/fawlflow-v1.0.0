@@ -12,13 +12,14 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { SectionNav } from "@/components/section-nav";
-
-const NAV_ITEMS = [
-  { href: "/eggs/cages", label: "Cages" },
-  { href: "/eggs/log", label: "Log Eggs" },
-];
+import { getT } from "@/lib/i18n/server";
 
 export default async function CagesPage() {
+  const { t } = await getT();
+  const navItems = [
+    { href: "/eggs/cages", label: t("eggs.cages.title") },
+    { href: "/eggs/log", label: t("eggs.log.title") },
+  ];
   const cages = await prisma.cage.findMany({
     where: { isActive: true },
     orderBy: { name: "asc" },
@@ -26,21 +27,19 @@ export default async function CagesPage() {
 
   return (
     <div className="flex h-full flex-col space-y-4">
-      <SectionNav items={NAV_ITEMS} backHref="/eggs" backLabel="Eggs" />
+      <SectionNav items={navItems} backHref="/eggs" backLabel={t("eggs.hub.title")} />
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Cages</h1>
+        <h1 className="text-xl font-bold">{t("eggs.cages.title")}</h1>
         <Link
           href="/eggs/cages/new"
           className={cn(buttonVariants({ size: "sm" }))}
         >
-          + Add Cage
+          + {t("eggs.cages.addNew")}
         </Link>
       </div>
 
       {cages.length === 0 ? (
-        <p className="text-muted-foreground">
-          No cages yet. Add your first cage to start logging eggs.
-        </p>
+        <p className="text-muted-foreground">{t("eggs.cages.empty")}</p>
       ) : (
         <>
           {/* Mobile: stacked cards */}
@@ -53,12 +52,14 @@ export default async function CagesPage() {
                 <div>
                   <p className="font-medium">{cage.name}</p>
                   <p className="text-sm text-muted-foreground">
-                    {cage.currentChickenCount} chickens
+                    {t("eggs.cages.chickenCountSuffix", {
+                      count: cage.currentChickenCount,
+                    })}
                   </p>
                 </div>
                 <Link
                   href={`/eggs/cages/${cage.id}/edit`}
-                  aria-label="Edit cage"
+                  aria-label={t("eggs.cages.editAria")}
                   className={cn(
                     buttonVariants({ variant: "ghost", size: "icon-lg" }),
                     "text-muted-foreground",
@@ -75,8 +76,8 @@ export default async function CagesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Chicken Count</TableHead>
+                  <TableHead>{t("common.name")}</TableHead>
+                  <TableHead>{t("eggs.cages.chickenCountLabel")}</TableHead>
                   <TableHead />
                 </TableRow>
               </TableHeader>
@@ -88,7 +89,7 @@ export default async function CagesPage() {
                     <TableCell>
                       <Link
                         href={`/eggs/cages/${cage.id}/edit`}
-                        aria-label="Edit cage"
+                        aria-label={t("eggs.cages.editAria")}
                         className={cn(
                           buttonVariants({ variant: "ghost", size: "icon-lg" }),
                           "text-muted-foreground",

@@ -1,8 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { BackLink } from "@/components/back-link";
+import { getT } from "@/lib/i18n/server";
 import { PricesForm } from "./prices-form";
 
 export default async function PricesPage() {
+  const { t } = await getT();
   const [materials, feedTypes] = await Promise.all([
     prisma.rawMaterial.findMany({
       where: { isActive: true },
@@ -18,12 +20,10 @@ export default async function PricesPage() {
 
   return (
     <div className="space-y-4">
-      <BackLink href="/feed" label="Feed" />
-      <h1 className="text-xl font-bold">Selling Prices</h1>
+      <BackLink href="/feed" label={t("feed.hub.title")} />
+      <h1 className="text-xl font-bold">{t("feed.prices.title")}</h1>
       <p className="text-sm text-muted-foreground">
-        These prices pre-fill automatically when you record a sale — update
-        them whenever market prices change. You can still change the price on
-        any individual sale if needed.
+        {t("feed.prices.description")}
       </p>
       <PricesForm
         materials={materials.map((m) => ({

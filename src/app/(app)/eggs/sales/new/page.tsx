@@ -1,9 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { getEggPriceAsOf } from "@/lib/stock";
 import { BackLink } from "@/components/back-link";
+import { getT } from "@/lib/i18n/server";
 import { EggSaleForm } from "../egg-sale-form";
 
 export default async function NewEggSalePage() {
+  const { t } = await getT();
   const [boxTypes, buyers, defaultRatePerEgg] = await Promise.all([
     prisma.eggBoxType.findMany({
       where: { isActive: true },
@@ -20,8 +22,8 @@ export default async function NewEggSalePage() {
 
   return (
     <div className="space-y-4">
-      <BackLink href="/eggs/sales" label="Egg Sales" />
-      <h1 className="text-xl font-bold">Record Egg Sale</h1>
+      <BackLink href="/eggs/sales" label={t("eggs.sales.title")} />
+      <h1 className="text-xl font-bold">{t("eggs.sales.newTitle")}</h1>
       <EggSaleForm
         boxTypes={boxTypes}
         buyers={buyers}

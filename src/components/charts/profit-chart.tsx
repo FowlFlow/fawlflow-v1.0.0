@@ -10,6 +10,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useTranslations } from "@/lib/i18n/client";
 
 export type ProfitPoint = {
   key: string;
@@ -18,6 +19,7 @@ export type ProfitPoint = {
 };
 
 export function ProfitChart({ data }: { data: ProfitPoint[] }) {
+  const t = useTranslations();
   const values = data.map((d) => d.profit);
   const maxValue = Math.max(0, ...values);
   const minValue = Math.min(0, ...values);
@@ -55,7 +57,7 @@ export function ProfitChart({ data }: { data: ProfitPoint[] }) {
         />
         <Bar
           dataKey="profit"
-          name="Profit"
+          name={t("feed.reports.profitNavLabel")}
           radius={[3, 3, 0, 0]}
           isAnimationActive={false}
         >

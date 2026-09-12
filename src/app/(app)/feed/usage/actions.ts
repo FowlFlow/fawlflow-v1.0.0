@@ -5,14 +5,18 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getFeedStockKg } from "@/lib/stock";
+import { getT } from "@/lib/i18n/server";
+import type { Translate } from "@/lib/i18n/translate";
 
-const usageSchema = z.object({
-  feedTypeId: z.string().min(1, "Select a feed type"),
-  date: z.string().min(1, "Date is required"),
-  quantityKg: z.coerce.number().positive("Quantity must be greater than 0"),
-  notes: z.string().trim().max(300).optional(),
-  confirmed: z.coerce.boolean().optional(),
-});
+function buildUsageSchema(t: Translate) {
+  return z.object({
+    feedTypeId: z.string().min(1, t("feed.usage.selectFeedType")),
+    date: z.string().min(1, t("feed.common.dateRequired")),
+    quantityKg: z.coerce.number().positive(t("feed.common.quantityPositive")),
+    notes: z.string().trim().max(300).optional(),
+    confirmed: z.coerce.boolean().optional(),
+  });
+}
 
 export type UsageFormState = {
   error?: string;
@@ -30,7 +34,8 @@ export async function logFeedUsageAction(
   _prevState: UsageFormState,
   formData: FormData,
 ): Promise<UsageFormState> {
-  const parsed = usageSchema.safeParse({
+  const { t } = await getT();
+  const parsed = buildUsageSchema(t).safeParse({
     feedTypeId: formData.get("feedTypeId"),
     date: formData.get("date"),
     quantityKg: formData.get("quantityKg"),
@@ -39,13 +44,13 @@ export async function logFeedUsageAction(
   });
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Please check the form." };
+    return { error: parsed.error.issues[0]?.message ?? t("feed.common.checkForm") };
   }
 
   const { feedTypeId, date, quantityKg, notes, confirmed } = parsed.data;
 
   const feedType = await prisma.feedType.findUnique({ where: { id: feedTypeId } });
-  if (!feedType) return { error: "Feed type not found." };
+  if (!feedType) return { error: t("feed.common.feedTypeNotFound") };
 
   const availableKg = await getFeedStockKg(feedTypeId);
   const resultingKg = availableKg - quantityKg;
@@ -70,5 +75,5 @@ export async function logFeedUsageAction(
   revalidatePath("/feed/materials");
   revalidatePath("/feed/types");
   revalidatePath("/feed/usage");
-  redirect(`/feed/usage?flash=${encodeURIComponent("Farm use logged.")}`);
+  redirect(`/feed/usage?flash=${encodeURIComponent(t("feed.usage.logged"))}`);
 }

@@ -10,6 +10,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { cn } from "@/lib/utils";
 import { useActionToast } from "@/hooks/use-action-toast";
 import { recordSaleAction, type SaleFormState } from "./actions";
+import { useTranslations } from "@/lib/i18n/client";
 
 const initialState: SaleFormState = {};
 
@@ -33,6 +34,7 @@ export function SaleForm({
     initialState,
   );
   useActionToast(state?.error);
+  const t = useTranslations();
   const [saleType, setSaleType] = useState<"FEED" | "MATERIAL">(
     (state?.formValues?.saleType as "FEED" | "MATERIAL") ?? "FEED",
   );
@@ -71,9 +73,12 @@ export function SaleForm({
           <AlertDescription>
             {state.shortage && (
               <p>
-                {state.shortage.itemName}: selling {state.shortage.requestedKg}{" "}
-                kg but only {state.shortage.availableKg.toFixed(2)} kg in stock
-                ({state.shortage.resultingKg.toFixed(2)} kg after this)
+                {t("feed.sales.shortageMsg", {
+                  name: state.shortage.itemName,
+                  requested: state.shortage.requestedKg,
+                  available: state.shortage.availableKg.toFixed(2),
+                  resulting: state.shortage.resultingKg.toFixed(2),
+                })}
               </p>
             )}
           </AlertDescription>
@@ -81,7 +86,7 @@ export function SaleForm({
 
         <Button type="submit" variant="destructive" disabled={pending}>
           {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-          {pending ? "Recording…" : "Sell Anyway"}
+          {pending ? t("common.recording") : t("feed.sales.sellAnyway")}
         </Button>
       </form>
     );
@@ -90,7 +95,7 @@ export function SaleForm({
   return (
     <form action={formAction} className="max-w-lg space-y-5">
       <div className="space-y-2">
-        <Label>What are you selling?</Label>
+        <Label>{t("feed.sales.whatSelling")}</Label>
         <div className="flex gap-2">
           <button
             type="button"
@@ -102,7 +107,7 @@ export function SaleForm({
                 : "text-muted-foreground",
             )}
           >
-            Feed
+            {t("feed.common.feedBadge")}
           </button>
           <button
             type="button"
@@ -114,7 +119,7 @@ export function SaleForm({
                 : "text-muted-foreground",
             )}
           >
-            Raw Material
+            {t("feed.sales.materialToggle")}
           </button>
         </div>
         <input type="hidden" name="saleType" value={saleType} />
@@ -122,11 +127,11 @@ export function SaleForm({
 
       <div className="space-y-2">
         <Label htmlFor="itemId">
-          {saleType === "FEED" ? "Feed Type" : "Material"}
+          {saleType === "FEED" ? t("feed.common.feedType") : t("common.material")}
         </Label>
         {items.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            None available yet.
+            {t("feed.common.noneAvailable")}
           </p>
         ) : (
           <NativeSelect
@@ -138,7 +143,9 @@ export function SaleForm({
             key={saleType}
           >
             <option value="" disabled>
-              Select {saleType === "FEED" ? "a feed type" : "a material"}
+              {saleType === "FEED"
+                ? t("feed.sales.selectFeedTypeOption")
+                : t("feed.sales.selectMaterialOption")}
             </option>
             {items.map((item) => (
               <option key={item.id} value={item.id}>
@@ -150,13 +157,13 @@ export function SaleForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="buyerId">Buyer</Label>
+        <Label htmlFor="buyerId">{t("common.buyer")}</Label>
         {buyers.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No contacts yet.</p>
+          <p className="text-sm text-muted-foreground">{t("feed.common.noContactsYet")}</p>
         ) : (
           <NativeSelect id="buyerId" name="buyerId" required defaultValue="">
             <option value="" disabled>
-              Select a buyer
+              {t("feed.sales.selectBuyer")}
             </option>
             {buyers.map((buyer) => (
               <option key={buyer.id} value={buyer.id}>
@@ -168,13 +175,13 @@ export function SaleForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="date">Date</Label>
+        <Label htmlFor="date">{t("common.date")}</Label>
         <Input id="date" name="date" type="date" required defaultValue={today} />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
-          <Label htmlFor="quantityKg">Quantity (kg)</Label>
+          <Label htmlFor="quantityKg">{t("common.quantityKg")}</Label>
           <Input
             id="quantityKg"
             name="quantityKg"
@@ -186,7 +193,7 @@ export function SaleForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="pricePerKg">Price per KG (Rs.)</Label>
+          <Label htmlFor="pricePerKg">{t("common.pricePerKg")}</Label>
           <Input
             ref={priceInputRef}
             id="pricePerKg"
@@ -201,7 +208,7 @@ export function SaleForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="notes">Notes</Label>
+        <Label htmlFor="notes">{t("common.notes")}</Label>
         <Input id="notes" name="notes" />
       </div>
 
@@ -216,7 +223,7 @@ export function SaleForm({
         disabled={pending || items.length === 0 || buyers.length === 0}
       >
         {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-        {pending ? "Recording…" : "Record Sale"}
+        {pending ? t("common.recording") : t("feed.sales.recordSale")}
       </Button>
     </form>
   );

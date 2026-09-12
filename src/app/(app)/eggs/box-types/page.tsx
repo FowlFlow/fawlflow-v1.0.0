@@ -12,13 +12,14 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { SectionNav } from "@/components/section-nav";
-
-const NAV_ITEMS = [
-  { href: "/eggs/box-types", label: "Box Types" },
-  { href: "/eggs/sales", label: "Sales" },
-];
+import { getT } from "@/lib/i18n/server";
 
 export default async function BoxTypesPage() {
+  const { t } = await getT();
+  const navItems = [
+    { href: "/eggs/box-types", label: t("eggs.boxTypes.title") },
+    { href: "/eggs/sales", label: t("eggs.sales.navLabel") },
+  ];
   const boxTypes = await prisma.eggBoxType.findMany({
     where: { isActive: true },
     orderBy: { eggsPerBox: "asc" },
@@ -26,19 +27,19 @@ export default async function BoxTypesPage() {
 
   return (
     <div className="flex h-full flex-col space-y-4">
-      <SectionNav items={NAV_ITEMS} backHref="/eggs" backLabel="Eggs" />
+      <SectionNav items={navItems} backHref="/eggs" backLabel={t("eggs.hub.title")} />
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Box Types</h1>
+        <h1 className="text-xl font-bold">{t("eggs.boxTypes.title")}</h1>
         <Link
           href="/eggs/box-types/new"
           className={cn(buttonVariants({ size: "sm" }))}
         >
-          + Add Box Type
+          + {t("eggs.boxTypes.addNew")}
         </Link>
       </div>
 
       {boxTypes.length === 0 ? (
-        <p className="text-muted-foreground">No box types yet.</p>
+        <p className="text-muted-foreground">{t("eggs.boxTypes.empty")}</p>
       ) : (
         <>
           {/* Mobile: stacked cards */}
@@ -51,12 +52,14 @@ export default async function BoxTypesPage() {
                 <div>
                   <p className="font-medium">{boxType.name}</p>
                   <p className="text-sm text-muted-foreground">
-                    {boxType.eggsPerBox} eggs
+                    {t("eggs.boxTypes.eggsPerBoxCount", {
+                      count: boxType.eggsPerBox,
+                    })}
                   </p>
                 </div>
                 <Link
                   href={`/eggs/box-types/${boxType.id}/edit`}
-                  aria-label="Edit box type"
+                  aria-label={t("eggs.boxTypes.editAria")}
                   className={cn(
                     buttonVariants({ variant: "ghost", size: "icon-lg" }),
                     "text-muted-foreground",
@@ -73,8 +76,8 @@ export default async function BoxTypesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Eggs per Box</TableHead>
+                  <TableHead>{t("common.name")}</TableHead>
+                  <TableHead>{t("eggs.boxTypes.eggsPerBoxLabel")}</TableHead>
                   <TableHead />
                 </TableRow>
               </TableHeader>
@@ -86,7 +89,7 @@ export default async function BoxTypesPage() {
                     <TableCell>
                       <Link
                         href={`/eggs/box-types/${boxType.id}/edit`}
-                        aria-label="Edit box type"
+                        aria-label={t("eggs.boxTypes.editAria")}
                         className={cn(
                           buttonVariants({ variant: "ghost", size: "icon-lg" }),
                           "text-muted-foreground",

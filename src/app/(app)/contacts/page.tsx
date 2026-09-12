@@ -12,8 +12,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { getT } from "@/lib/i18n/server";
 
 export default async function ContactsPage() {
+  const { t } = await getT();
   const contacts = await prisma.contact.findMany({
     where: { isActive: true },
     orderBy: { name: "asc" },
@@ -22,16 +24,14 @@ export default async function ContactsPage() {
   return (
     <div className="flex h-full flex-col space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Contacts</h1>
+        <h1 className="text-xl font-bold">{t("contacts.title")}</h1>
         <Link href="/contacts/new" className={cn(buttonVariants({ size: "sm" }))}>
-          + Add Contact
+          + {t("contacts.addNew")}
         </Link>
       </div>
 
       {contacts.length === 0 ? (
-        <p className="text-muted-foreground">
-          No contacts yet. Add buyers and suppliers here.
-        </p>
+        <p className="text-muted-foreground">{t("contacts.empty")}</p>
       ) : (
         <>
           {/* Mobile: stacked cards */}
@@ -42,7 +42,7 @@ export default async function ContactsPage() {
                   <p className="font-medium">{contact.name}</p>
                   <Link
                     href={`/contacts/${contact.id}/edit`}
-                    aria-label="Edit contact"
+                    aria-label={t("contacts.editTitle")}
                     className={cn(
                       buttonVariants({ variant: "ghost", size: "icon-lg" }),
                       "shrink-0 text-muted-foreground",
@@ -52,13 +52,15 @@ export default async function ContactsPage() {
                   </Link>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {contact.phone ?? "No phone number"}
+                  {contact.phone ?? t("contacts.noPhone")}
                 </p>
                 <div className="mt-2 space-x-1">
                   {contact.isSupplier && (
-                    <Badge variant="secondary">Supplier</Badge>
+                    <Badge variant="secondary">{t("common.supplier")}</Badge>
                   )}
-                  {contact.isBuyer && <Badge variant="secondary">Buyer</Badge>}
+                  {contact.isBuyer && (
+                    <Badge variant="secondary">{t("common.buyer")}</Badge>
+                  )}
                 </div>
               </div>
             ))}
@@ -69,9 +71,9 @@ export default async function ContactsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Role</TableHead>
+                  <TableHead>{t("common.name")}</TableHead>
+                  <TableHead>{t("contacts.phone")}</TableHead>
+                  <TableHead>{t("contacts.role")}</TableHead>
                   <TableHead />
                 </TableRow>
               </TableHeader>
@@ -82,9 +84,11 @@ export default async function ContactsPage() {
                     <TableCell>{contact.phone ?? "—"}</TableCell>
                     <TableCell className="space-x-1">
                       {contact.isSupplier && (
-                        <Badge variant="secondary">Supplier</Badge>
+                        <Badge variant="secondary">{t("common.supplier")}</Badge>
                       )}
-                      {contact.isBuyer && <Badge variant="secondary">Buyer</Badge>}
+                      {contact.isBuyer && (
+                        <Badge variant="secondary">{t("common.buyer")}</Badge>
+                      )}
                       {!contact.isSupplier && !contact.isBuyer && (
                         <span className="text-muted-foreground">—</span>
                       )}
@@ -92,7 +96,7 @@ export default async function ContactsPage() {
                     <TableCell>
                       <Link
                         href={`/contacts/${contact.id}/edit`}
-                        aria-label="Edit contact"
+                        aria-label={t("contacts.editTitle")}
                         className={cn(
                           buttonVariants({ variant: "ghost", size: "icon-lg" }),
                           "text-muted-foreground",

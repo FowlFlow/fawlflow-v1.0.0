@@ -5,17 +5,25 @@ import { randomBytes } from "node:crypto";
 import bcrypt from "bcryptjs";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { getT } from "@/lib/i18n/server";
+import type { Translate } from "@/lib/i18n/translate";
 
-const changePasswordSchema = z
-  .object({
-    currentPassword: z.string().min(1, "Enter your current password"),
-    newPassword: z.string().min(8, "New password must be at least 8 characters"),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "New passwords don't match",
-    path: ["confirmPassword"],
-  });
+function buildChangePasswordSchema(t: Translate) {
+  return z
+    .object({
+      currentPassword: z
+        .string()
+        .min(1, t("settings.changePassword.errors.currentRequired")),
+      newPassword: z
+        .string()
+        .min(8, t("settings.changePassword.errors.tooShort")),
+      confirmPassword: z.string(),
+    })
+    .refine((data) => data.newPassword === data.confirmPassword, {
+      message: t("settings.changePassword.errors.mismatch"),
+      path: ["confirmPassword"],
+    });
+}
 
 export type ChangePasswordState = { error?: string; success?: boolean };
 
@@ -23,9 +31,11 @@ export async function changePasswordAction(
   _prevState: ChangePasswordState,
   formData: FormData,
 ): Promise<ChangePasswordState> {
+  const { t } = await getT();
   const session = await auth();
-  if (!session?.user?.name) return { error: "Not signed in." };
+  if (!session?.user?.name) return { error: t("settings.errors.notSignedIn") };
 
+  const changePasswordSchema = buildChangePasswordSchema(t);
   const parsed = changePasswordSchema.safeParse({
     currentPassword: formData.get("currentPassword"),
     newPassword: formData.get("newPassword"),
@@ -33,19 +43,25 @@ export async function changePasswordAction(
   });
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Please check the form." };
+    return {
+      error:
+        parsed.error.issues[0]?.message ??
+        t("settings.changePassword.errors.checkForm"),
+    };
   }
 
   const user = await prisma.user.findUnique({
     where: { username: session.user.name },
   });
-  if (!user) return { error: "User not found." };
+  if (!user) return { error: t("settings.errors.userNotFound") };
 
   const currentValid = await bcrypt.compare(
     parsed.data.currentPassword,
     user.passwordHash,
   );
-  if (!currentValid) return { error: "Current password is incorrect." };
+  if (!currentValid) {
+    return { error: t("settings.changePassword.errors.currentIncorrect") };
+  }
 
   await prisma.user.update({
     where: { id: user.id },
@@ -61,13 +77,14 @@ export async function regenerateRecoveryCodeAction(
   _prevState: RegenerateCodeState,
   _formData: FormData,
 ): Promise<RegenerateCodeState> {
+  const { t } = await getT();
   const session = await auth();
-  if (!session?.user?.name) return { error: "Not signed in." };
+  if (!session?.user?.name) return { error: t("settings.errors.notSignedIn") };
 
   const user = await prisma.user.findUnique({
     where: { username: session.user.name },
   });
-  if (!user) return { error: "User not found." };
+  if (!user) return { error: t("settings.errors.userNotFound") };
 
   const newCode = randomBytes(5).toString("hex").toUpperCase();
   await prisma.user.update({

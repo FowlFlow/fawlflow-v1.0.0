@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useTranslations } from "@/lib/i18n/client";
 
 export type SalesPurchasesPoint = {
   date: string;
@@ -18,6 +19,8 @@ export type SalesPurchasesPoint = {
 };
 
 export function SalesPurchasesChart({ data }: { data: SalesPurchasesPoint[] }) {
+  const t = useTranslations();
+
   return (
     <ResponsiveContainer width="100%" height={220}>
       <BarChart data={data} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
@@ -48,14 +51,14 @@ export function SalesPurchasesChart({ data }: { data: SalesPurchasesPoint[] }) {
         />
         <Bar
           dataKey="sales"
-          name="Sales"
+          name={t("home.sales")}
           fill="var(--color-chart-1)"
           radius={[3, 3, 0, 0]}
           isAnimationActive={false}
         />
         <Bar
           dataKey="purchases"
-          name="Purchases"
+          name={t("home.purchases")}
           fill="var(--color-chart-3)"
           radius={[3, 3, 0, 0]}
           isAnimationActive={false}

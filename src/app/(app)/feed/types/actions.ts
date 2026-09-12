@@ -4,14 +4,18 @@ import { z } from "zod";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { getT } from "@/lib/i18n/server";
+import type { Translate } from "@/lib/i18n/translate";
 
-const feedTypeSchema = z.object({
-  id: z.string().optional(),
-  nameEn: z.string().trim().min(1, "English name is required").max(100),
-  nameSi: z.string().trim().max(100).optional(),
-  batchSizeKg: z.coerce.number().positive("Batch size must be greater than 0"),
-  defaultSellPricePerKg: z.coerce.number().min(0),
-});
+function buildFeedTypeSchema(t: Translate) {
+  return z.object({
+    id: z.string().optional(),
+    nameEn: z.string().trim().min(1, t("feed.materials.nameEnRequired")).max(100),
+    nameSi: z.string().trim().max(100).optional(),
+    batchSizeKg: z.coerce.number().positive(t("feed.types.batchSizePositive")),
+    defaultSellPricePerKg: z.coerce.number().min(0),
+  });
+}
 
 const ingredientSchema = z.object({
   materialId: z.string().min(1),
@@ -24,7 +28,8 @@ export async function saveFeedTypeAction(
   _prevState: FeedTypeFormState,
   formData: FormData,
 ): Promise<FeedTypeFormState> {
-  const parsed = feedTypeSchema.safeParse({
+  const { t } = await getT();
+  const parsed = buildFeedTypeSchema(t).safeParse({
     id: formData.get("id") || undefined,
     nameEn: formData.get("nameEn"),
     nameSi: formData.get("nameSi") || undefined,
@@ -33,7 +38,7 @@ export async function saveFeedTypeAction(
   });
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Please check the form." };
+    return { error: parsed.error.issues[0]?.message ?? t("feed.common.checkForm") };
   }
 
   const materialIds = formData.getAll("materialId[]");
@@ -51,12 +56,12 @@ export async function saveFeedTypeAction(
   }
 
   if (ingredients.length === 0) {
-    return { error: "Add at least one ingredient." };
+    return { error: t("feed.types.addIngredientValidation") };
   }
 
   const materialIdSet = new Set(ingredients.map((i) => i.materialId));
   if (materialIdSet.size !== ingredients.length) {
-    return { error: "Each material can only appear once in a recipe." };
+    return { error: t("feed.types.uniqueIngredient") };
   }
 
   const { id, nameEn, nameSi, batchSizeKg, defaultSellPricePerKg } = parsed.data;
@@ -141,5 +146,7 @@ export async function saveFeedTypeAction(
   });
 
   revalidatePath("/feed/types");
-  redirect(`/feed/types?flash=${encodeURIComponent(id ? "Recipe updated." : "Recipe added.")}`);
+  redirect(
+    `/feed/types?flash=${encodeURIComponent(id ? t("feed.types.updated") : t("feed.types.added"))}`,
+  );
 }

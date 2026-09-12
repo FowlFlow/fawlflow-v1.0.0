@@ -5,17 +5,21 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getEggStockCount } from "@/lib/stock";
+import { getT } from "@/lib/i18n/server";
+import type { Translate } from "@/lib/i18n/translate";
 
-const eggSaleSchema = z.object({
-  buyerId: z.string().min(1, "Select a buyer"),
-  date: z.string().min(1, "Date is required"),
-  boxTypeId: z.string().optional(),
-  boxCount: z.coerce.number().int().min(0),
-  looseEggCount: z.coerce.number().int().min(0),
-  ratePerEgg: z.coerce.number().min(0),
-  notes: z.string().trim().max(300).optional(),
-  confirmed: z.coerce.boolean().optional(),
-});
+function eggSaleSchema(t: Translate) {
+  return z.object({
+    buyerId: z.string().min(1, t("eggs.sales.selectBuyer")),
+    date: z.string().min(1, `${t("common.date")} ${t("common.required")}`),
+    boxTypeId: z.string().optional(),
+    boxCount: z.coerce.number().int().min(0),
+    looseEggCount: z.coerce.number().int().min(0),
+    ratePerEgg: z.coerce.number().min(0),
+    notes: z.string().trim().max(300).optional(),
+    confirmed: z.coerce.boolean().optional(),
+  });
+}
 
 export type EggSaleFormState = {
   error?: string;
@@ -40,7 +44,8 @@ export async function recordEggSaleAction(
   _prevState: EggSaleFormState,
   formData: FormData,
 ): Promise<EggSaleFormState> {
-  const parsed = eggSaleSchema.safeParse({
+  const { t } = await getT();
+  const parsed = eggSaleSchema(t).safeParse({
     buyerId: formData.get("buyerId"),
     date: formData.get("date"),
     boxTypeId: formData.get("boxTypeId") || undefined,
@@ -52,7 +57,9 @@ export async function recordEggSaleAction(
   });
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Please check the form." };
+    return {
+      error: parsed.error.issues[0]?.message ?? t("eggs.validation.checkForm"),
+    };
   }
 
   const {
@@ -67,19 +74,19 @@ export async function recordEggSaleAction(
   } = parsed.data;
 
   if (boxCount === 0 && looseEggCount === 0) {
-    return { error: "Enter some boxes or some loose eggs." };
+    return { error: t("eggs.sales.enterBoxesOrLoose") };
   }
   if (boxCount > 0 && !boxTypeId) {
-    return { error: "Select a box type, or set box count to 0." };
+    return { error: t("eggs.sales.selectBoxTypeOrZero") };
   }
 
   const buyer = await prisma.contact.findUnique({ where: { id: buyerId } });
-  if (!buyer) return { error: "Buyer not found." };
+  if (!buyer) return { error: t("eggs.sales.buyerNotFound") };
 
   let eggsPerBoxAtSale: number | null = null;
   if (boxTypeId) {
     const boxType = await prisma.eggBoxType.findUnique({ where: { id: boxTypeId } });
-    if (!boxType) return { error: "Box type not found." };
+    if (!boxType) return { error: t("eggs.sales.boxTypeNotFound") };
     eggsPerBoxAtSale = boxType.eggsPerBox;
   }
 
@@ -128,5 +135,5 @@ export async function recordEggSaleAction(
 
   revalidatePath("/eggs/reports");
   revalidatePath("/eggs/sales");
-  redirect(`/eggs/sales?flash=${encodeURIComponent("Sale recorded.")}`);
+  redirect(`/eggs/sales?flash=${encodeURIComponent(t("eggs.sales.recorded"))}`);
 }

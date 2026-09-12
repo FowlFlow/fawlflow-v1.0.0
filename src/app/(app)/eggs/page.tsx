@@ -1,59 +1,66 @@
 import { LayoutGrid, ClipboardList, Package, TrendingUp, BarChart3 } from "lucide-react";
 import { HubLinkGrid } from "@/components/hub-links";
+import { getT } from "@/lib/i18n/server";
+import type { Translate } from "@/lib/i18n/translate";
 
-const GROUPS = [
-  {
-    title: "Daily Operations",
-    links: [
-      {
-        href: "/eggs/cages",
-        label: "Cages",
-        description: "Manage cages and chicken counts",
-        icon: LayoutGrid,
-      },
-      {
-        href: "/eggs/log",
-        label: "Log Eggs",
-        description: "Enter today's egg collection",
-        icon: ClipboardList,
-      },
-    ],
-  },
-  {
-    title: "Selling",
-    links: [
-      {
-        href: "/eggs/box-types",
-        label: "Box Types",
-        description: "Manage egg box sizes",
-        icon: Package,
-      },
-      {
-        href: "/eggs/sales",
-        label: "Sales",
-        description: "Eggs sold, by box or loose",
-        icon: TrendingUp,
-      },
-    ],
-  },
-  {
-    title: "Reports",
-    links: [
-      {
-        href: "/eggs/reports",
-        label: "Reports",
-        description: "Daily and range egg totals",
-        icon: BarChart3,
-      },
-    ],
-  },
-];
+function buildGroups(t: Translate) {
+  return [
+    {
+      title: t("eggs.hub.dailyOperations"),
+      links: [
+        {
+          href: "/eggs/cages",
+          label: t("eggs.cages.title"),
+          description: t("eggs.hub.cagesDesc"),
+          icon: LayoutGrid,
+        },
+        {
+          href: "/eggs/log",
+          label: t("eggs.log.title"),
+          description: t("eggs.hub.logDesc"),
+          icon: ClipboardList,
+        },
+      ],
+    },
+    {
+      title: t("eggs.hub.selling"),
+      links: [
+        {
+          href: "/eggs/box-types",
+          label: t("eggs.boxTypes.title"),
+          description: t("eggs.hub.boxTypesDesc"),
+          icon: Package,
+        },
+        {
+          href: "/eggs/sales",
+          label: t("eggs.sales.navLabel"),
+          description: t("eggs.hub.salesDesc"),
+          icon: TrendingUp,
+        },
+      ],
+    },
+    {
+      title: t("eggs.hub.reportsGroup"),
+      links: [
+        {
+          href: "/eggs/reports",
+          label: t("eggs.reports.navLabel"),
+          description: t("eggs.hub.reportsDesc"),
+          icon: BarChart3,
+        },
+      ],
+    },
+  ];
+}
 
-export default function EggsHubPage() {
+export default async function EggsHubPage() {
+  const { t } = await getT();
+  const groups = buildGroups(t);
+
   return (
     <div className="space-y-6">
-      <h1 className="text-xl font-bold">Eggs</h1>
-      {GROUPS.map((group) => (
+      <h1 className="text-xl font-bold">{t("eggs.hub.title")}</h1>
+      {groups.map((group) => (
         <div key={group.title}>
           <h2 className="mb-2 text-sm font-medium text-muted-foreground">
             {group.title}

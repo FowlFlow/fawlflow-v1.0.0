@@ -11,13 +11,14 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { SectionNav } from "@/components/section-nav";
-
-const NAV_ITEMS = [
-  { href: "/feed/sales", label: "Sales" },
-  { href: "/feed/usage", label: "Farm Use" },
-];
+import { getT } from "@/lib/i18n/server";
 
 export default async function UsagePage() {
+  const { t } = await getT();
+  const NAV_ITEMS = [
+    { href: "/feed/sales", label: t("feed.sales.navLabel") },
+    { href: "/feed/usage", label: t("feed.usage.navLabel") },
+  ];
   const usages = await prisma.feedUsage.findMany({
     where: { deletedAt: null },
     orderBy: { date: "desc" },
@@ -27,21 +28,19 @@ export default async function UsagePage() {
 
   return (
     <div className="flex h-full flex-col space-y-4">
-      <SectionNav items={NAV_ITEMS} backHref="/feed" backLabel="Feed" />
+      <SectionNav items={NAV_ITEMS} backHref="/feed" backLabel={t("feed.hub.title")} />
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Farm Use</h1>
+        <h1 className="text-xl font-bold">{t("feed.usage.navLabel")}</h1>
         <Link
           href="/feed/usage/new"
           className={cn(buttonVariants({ size: "sm" }))}
         >
-          + Log Farm Use
+          + {t("feed.usage.logNew")}
         </Link>
       </div>
 
       {usages.length === 0 ? (
-        <p className="text-muted-foreground">
-          No farm-use entries recorded yet.
-        </p>
+        <p className="text-muted-foreground">{t("feed.usage.emptyState")}</p>
       ) : (
         <>
           {/* Mobile: stacked cards */}
@@ -69,10 +68,10 @@ export default async function UsagePage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Feed Type</TableHead>
-                  <TableHead>Quantity</TableHead>
-                  <TableHead>Notes</TableHead>
+                  <TableHead>{t("common.date")}</TableHead>
+                  <TableHead>{t("feed.common.feedType")}</TableHead>
+                  <TableHead>{t("common.quantity")}</TableHead>
+                  <TableHead>{t("common.notes")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

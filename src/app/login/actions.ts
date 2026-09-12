@@ -2,6 +2,7 @@
 
 import { AuthError } from "next-auth";
 import { signIn } from "@/auth";
+import { getT } from "@/lib/i18n/server";
 
 export type LoginState = { error?: string };
 
@@ -18,7 +19,8 @@ export async function loginAction(
     return {};
   } catch (error) {
     if (error instanceof AuthError) {
-      return { error: "Invalid username or password." };
+      const { t } = await getT();
+      return { error: t("auth.errorInvalidCredentials") };
     }
     throw error;
   }

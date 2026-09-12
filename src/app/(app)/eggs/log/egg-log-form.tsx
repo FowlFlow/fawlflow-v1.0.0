@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useActionToast } from "@/hooks/use-action-toast";
+import { useTranslations } from "@/lib/i18n/client";
 import { saveEggLogAction, type EggLogFormState } from "./actions";
 
 const initialState: EggLogFormState = {};
@@ -29,15 +30,16 @@ export function EggLogForm({
     initialState,
   );
   useActionToast(state?.error);
+  const t = useTranslations();
   useEffect(() => {
-    if (state?.success) toast.success("Eggs saved.");
-  }, [state?.success]);
+    if (state?.success) toast.success(t("eggs.log.savedToast"));
+  }, [state?.success, t]);
 
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
         <label htmlFor="date-picker" className="text-sm font-medium">
-          Date
+          {t("common.date")}
         </label>
         <input
           id="date-picker"
@@ -54,7 +56,7 @@ export function EggLogForm({
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
-                <th className="p-2 text-left font-medium">Cage</th>
+                <th className="p-2 text-left font-medium">{t("eggs.log.cageColumn")}</th>
                 {turns.map((turn) => (
                   <th key={turn.id} className="p-2 text-left font-medium">
                     {turn.name}
@@ -94,13 +96,13 @@ export function EggLogForm({
         )}
         {state?.success && (
           <Alert>
-            <AlertDescription>Saved.</AlertDescription>
+            <AlertDescription>{t("eggs.log.saved")}</AlertDescription>
           </Alert>
         )}
 
         <Button type="submit" disabled={pending}>
           {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-          {pending ? "Saving…" : "Save"}
+          {pending ? t("common.saving") : t("common.save")}
         </Button>
       </form>
     </div>

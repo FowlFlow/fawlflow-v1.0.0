@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { getT } from "@/lib/i18n/server";
 
 export type UpdatePricesState = { error?: string };
 
@@ -10,6 +11,7 @@ export async function updateSellingPricesAction(
   _prevState: UpdatePricesState,
   formData: FormData,
 ): Promise<UpdatePricesState> {
+  const { t } = await getT();
   const [materials, feedTypes] = await Promise.all([
     prisma.rawMaterial.findMany({ where: { isActive: true }, select: { id: true } }),
     prisma.feedType.findMany({ where: { isActive: true }, select: { id: true } }),
@@ -20,14 +22,14 @@ export async function updateSellingPricesAction(
   for (const m of materials) {
     const price = Number(formData.get(`material:${m.id}`));
     if (!Number.isFinite(price) || price < 0) {
-      return { error: "Please enter a valid price for every item." };
+      return { error: t("feed.prices.invalidPrice") };
     }
     updates.push({ table: "material", id: m.id, price });
   }
   for (const f of feedTypes) {
     const price = Number(formData.get(`feedType:${f.id}`));
     if (!Number.isFinite(price) || price < 0) {
-      return { error: "Please enter a valid price for every item." };
+      return { error: t("feed.prices.invalidPrice") };
     }
     updates.push({ table: "feedType", id: f.id, price });
   }
@@ -50,5 +52,5 @@ export async function updateSellingPricesAction(
   revalidatePath("/feed/types");
   revalidatePath("/feed/prices");
   revalidatePath("/");
-  redirect(`/feed/prices?flash=${encodeURIComponent("Prices updated.")}`);
+  redirect(`/feed/prices?flash=${encodeURIComponent(t("feed.prices.updated"))}`);
 }

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useActionToast } from "@/hooks/use-action-toast";
+import { useTranslations } from "@/lib/i18n/client";
 import { changePasswordAction, type ChangePasswordState } from "./actions";
 
 const initialState: ChangePasswordState = {};
@@ -18,14 +19,17 @@ export function ChangePasswordForm() {
     initialState,
   );
   useActionToast(state?.error);
+  const t = useTranslations();
   useEffect(() => {
-    if (state?.success) toast.success("Password changed.");
-  }, [state?.success]);
+    if (state?.success) toast.success(t("settings.changePassword.toastSuccess"));
+  }, [state?.success, t]);
 
   return (
     <form action={formAction} className="max-w-sm space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="currentPassword">Current Password</Label>
+        <Label htmlFor="currentPassword">
+          {t("settings.changePassword.currentPassword")}
+        </Label>
         <Input
           id="currentPassword"
           name="currentPassword"
@@ -35,7 +39,9 @@ export function ChangePasswordForm() {
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="newPassword">New Password</Label>
+        <Label htmlFor="newPassword">
+          {t("settings.changePassword.newPassword")}
+        </Label>
         <Input
           id="newPassword"
           name="newPassword"
@@ -45,7 +51,9 @@ export function ChangePasswordForm() {
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="confirmPassword">Confirm New Password</Label>
+        <Label htmlFor="confirmPassword">
+          {t("settings.changePassword.confirmPassword")}
+        </Label>
         <Input
           id="confirmPassword"
           name="confirmPassword"
@@ -62,13 +70,15 @@ export function ChangePasswordForm() {
       )}
       {state?.success && (
         <Alert>
-          <AlertDescription>Password changed.</AlertDescription>
+          <AlertDescription>
+            {t("settings.changePassword.toastSuccess")}
+          </AlertDescription>
         </Alert>
       )}
 
       <Button type="submit" disabled={pending}>
         {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-        {pending ? "Saving…" : "Change Password"}
+        {pending ? t("common.saving") : t("settings.changePassword.title")}
       </Button>
     </form>
   );

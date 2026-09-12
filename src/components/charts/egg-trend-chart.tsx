@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useTranslations } from "@/lib/i18n/client";
 
 export type EggTrendPoint = {
   date: string;
@@ -18,6 +19,8 @@ export type EggTrendPoint = {
 };
 
 export function EggTrendChart({ data }: { data: EggTrendPoint[] }) {
+  const t = useTranslations();
+
   return (
     <ResponsiveContainer width="100%" height={220}>
       <LineChart data={data} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
@@ -42,7 +45,7 @@ export function EggTrendChart({ data }: { data: EggTrendPoint[] }) {
         <Line
           type="monotone"
           dataKey="collected"
-          name="Collected"
+          name={t("home.collected")}
           stroke="var(--color-chart-1)"
           strokeWidth={2}
           dot={false}
@@ -51,7 +54,7 @@ export function EggTrendChart({ data }: { data: EggTrendPoint[] }) {
         <Line
           type="monotone"
           dataKey="sold"
-          name="Sold"
+          name={t("home.sold")}
           stroke="var(--color-chart-2)"
           strokeWidth={2}
           dot={false}

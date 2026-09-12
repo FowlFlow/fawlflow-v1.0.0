@@ -31,74 +31,118 @@ import {
   type EggTrendPoint,
 } from "@/components/charts/egg-trend-chart";
 import { SegmentedFilter } from "@/components/segmented-filter";
+import { getT } from "@/lib/i18n/server";
+import type { Translate } from "@/lib/i18n/translate";
 
-const QUICK_LINKS = [
-  {
-    href: "/feed",
-    icon: Wheat,
-    label: "Feed",
-    description: "Materials, recipes, sales, and reports",
-  },
-  {
-    href: "/eggs",
-    icon: Egg,
-    label: "Eggs",
-    description: "Cages, daily logging, and reports",
-  },
-  {
-    href: "/contacts",
-    icon: Users,
-    label: "Contacts",
-    description: "Buyers and suppliers",
-  },
-];
+function buildQuickLinks(t: Translate) {
+  return [
+    {
+      href: "/feed",
+      icon: Wheat,
+      label: t("home.linkFeed"),
+      description: t("home.linkFeedDesc"),
+    },
+    {
+      href: "/eggs",
+      icon: Egg,
+      label: t("home.linkEggs"),
+      description: t("home.linkEggsDesc"),
+    },
+    {
+      href: "/contacts",
+      icon: Users,
+      label: t("home.linkContacts"),
+      description: t("home.linkContactsDesc"),
+    },
+  ];
+}
 
-const QUICK_ACTIONS = [
-  {
-    href: "/eggs/log",
-    icon: ClipboardList,
-    label: "Log Eggs",
-    description: "Record today's collection",
-  },
-  {
-    href: "/eggs/sales/new",
-    icon: HandCoins,
-    label: "Sell Eggs",
-    description: "Record an egg sale",
-  },
-  {
-    href: "/feed/sales/new",
-    icon: HandCoins,
-    label: "Sell Feed / Material",
-    description: "Record a feed or material sale",
-  },
-  {
-    href: "/feed/purchases/new",
-    icon: ShoppingCart,
-    label: "Record Purchase",
-    description: "Log a raw material purchase",
-  },
-];
+function buildQuickActions(t: Translate) {
+  return [
+    {
+      href: "/eggs/log",
+      icon: ClipboardList,
+      label: t("home.actionLogEggs"),
+      description: t("home.actionLogEggsDesc"),
+    },
+    {
+      href: "/eggs/sales/new",
+      icon: HandCoins,
+      label: t("home.actionSellEggs"),
+      description: t("home.actionSellEggsDesc"),
+    },
+    {
+      href: "/feed/sales/new",
+      icon: HandCoins,
+      label: t("home.actionSellFeed"),
+      description: t("home.actionSellFeedDesc"),
+    },
+    {
+      href: "/feed/purchases/new",
+      icon: ShoppingCart,
+      label: t("home.actionRecordPurchase"),
+      description: t("home.actionRecordPurchaseDesc"),
+    },
+  ];
+}
 
 type Range = "week" | "month" | "year";
 
-const RANGE_LABELS: Record<Range, string> = {
-  week: "Last 7 Days",
-  month: "Last 30 Days",
-  year: "Last 12 Months",
-};
-
 // Server runs in UTC; the farm is in Sri Lanka, so greeting/date must use that zone explicitly.
 const FARM_TIME_ZONE = "Asia/Colombo";
+
+// Node's bundled ICU data renders Sinhala weekday/month names incorrectly
+// (e.g. "September" -> "බිනර"), so the display date is built from these
+// known-correct tables instead of trusting Intl's "si-LK" locale data.
+const WEEKDAY_SI: Record<string, string> = {
+  Sunday: "ඉරිදා",
+  Monday: "සඳුදා",
+  Tuesday: "අඟහරුවාදා",
+  Wednesday: "බදාදා",
+  Thursday: "බ්‍රහස්පතින්දා",
+  Friday: "සිකුරාදා",
+  Saturday: "සෙනසුරාදා",
+};
+const MONTH_SI: Record<string, string> = {
+  January: "ජනවාරි",
+  February: "පෙබරවාරි",
+  March: "මාර්තු",
+  April: "අප්‍රේල්",
+  May: "මැයි",
+  June: "ජූනි",
+  July: "ජූලි",
+  August: "අගෝස්තු",
+  September: "සැප්තැම්බර්",
+  October: "ඔක්තෝබර්",
+  November: "නොවැම්බර්",
+  December: "දෙසැම්බර්",
+};
+
+function formatFarmDate(date: Date, locale: "en" | "si"): string {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: FARM_TIME_ZONE,
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  }).formatToParts(date);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+  const weekday = get("weekday");
+  const month = get("month");
+  const day = get("day");
+
+  return locale === "en"
+    ? `${weekday}, ${month} ${day}`
+    : `${WEEKDAY_SI[weekday] ?? weekday}, ${MONTH_SI[month] ?? month} ${day}`;
+}
 
 function dateKey(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
 
-function getGreeting(hour: number): string {
-  if (hour < 12) return "Good morning";
-  if (hour < 17) return "Good afternoon";
-  return "Good evening";
+function getGreeting(hour: number, t: Translate): string {
+  if (hour < 12) return t("home.goodMorning");
+  if (hour < 17) return t("home.goodAfternoon");
+  return t("home.goodEvening");
 }
 
 function parseRange(value: string | undefined): Range {
@@ -150,6 +194,12 @@ function buildBuckets(range: Range): { key: string; label: string }[] {
 }
 
 export default async function HomePage(props: PageProps<"/">) {
+  const { t, locale } = await getT();
+  const rangeLabels: Record<Range, string> = {
+    week: t("home.rangeWeek"),
+    month: t("home.rangeMonth"),
+    year: t("home.rangeYear"),
+  };
   const searchParams = await props.searchParams;
   const range = parseRange(
     typeof searchParams.range === "string" ? searchParams.range : undefined,
@@ -166,12 +216,7 @@ export default async function HomePage(props: PageProps<"/">) {
       hourCycle: "h23",
     }).format(now),
   );
-  const displayDate = now.toLocaleDateString("en-US", {
-    timeZone: FARM_TIME_ZONE,
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-  });
+  const displayDate = formatFarmDate(now, locale);
 
   const [
     todayEggs,
@@ -306,7 +351,7 @@ export default async function HomePage(props: PageProps<"/">) {
     <div className="space-y-8">
       <div>
         <h1 className="text-xl font-bold">
-          {getGreeting(localHour)}
+          {getGreeting(localHour, t)}
         </h1>
         <p className="text-sm text-muted-foreground">{displayDate}</p>
       </div>
@@ -316,25 +361,23 @@ export default async function HomePage(props: PageProps<"/">) {
           <CardContent className="space-y-3 pt-4">
             <div className="flex items-center gap-2 text-primary">
               <Sparkles className="h-5 w-5" />
-              <p className="font-semibold">Welcome to FowlFlow</p>
+              <p className="font-semibold">{t("home.welcomeTitle")}</p>
             </div>
             <p className="text-sm text-muted-foreground">
-              Your farm is set up but still empty. Start by adding a cage and
-              a raw material or two — stock, reports, and charts here will
-              fill in as you go.
+              {t("home.welcomeBody")}
             </p>
             <div className="flex flex-wrap gap-2">
               <Link
                 href="/eggs/cages/new"
                 className={cn(buttonVariants({ size: "sm" }))}
               >
-                Add a Cage
+                {t("home.addCage")}
               </Link>
               <Link
                 href="/feed/materials/new"
                 className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
               >
-                Add a Material
+                {t("home.addMaterial")}
               </Link>
             </div>
           </CardContent>
@@ -343,7 +386,7 @@ export default async function HomePage(props: PageProps<"/">) {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="rounded-2xl border bg-card p-5">
-          <p className="text-sm text-muted-foreground">Eggs collected today</p>
+          <p className="text-sm text-muted-foreground">{t("home.eggsCollectedToday")}</p>
           <p className="text-3xl font-bold">{eggsToday}</p>
         </div>
 
@@ -354,27 +397,27 @@ export default async function HomePage(props: PageProps<"/">) {
             className="mt-3 flex items-center gap-1.5 border-t pt-3 text-sm font-medium text-primary hover:text-primary/80"
           >
             <Tag className="h-4 w-4" />
-            Update material &amp; feed selling prices
+            {t("home.updatePrices")}
           </Link>
         </div>
       </div>
 
       <div className="space-y-3">
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-          Quick Actions
+          {t("home.quickActions")}
         </h2>
-        <HubLinkGrid links={QUICK_ACTIONS} />
+        <HubLinkGrid links={buildQuickActions(t)} />
       </div>
 
       {!isFreshInstall && (
         <div className="space-y-4">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-            Stock Summary
+            {t("home.stockSummary")}
           </h2>
           <div className="grid gap-4 sm:grid-cols-3">
             <Card>
               <CardHeader>
-                <CardTitle>Eggs</CardTitle>
+                <CardTitle>{t("home.stockEggsTitle")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p
@@ -385,18 +428,18 @@ export default async function HomePage(props: PageProps<"/">) {
                 >
                   {eggStock.toLocaleString()}
                 </p>
-                <p className="text-xs text-muted-foreground">in stock</p>
+                <p className="text-xs text-muted-foreground">{t("home.inStock")}</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Feed</CardTitle>
+                <CardTitle>{t("home.stockFeedTitle")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-1.5">
                 {feedStocks.length === 0 ? (
                   <p className="text-sm text-muted-foreground">
-                    No feed types yet.
+                    {t("home.noFeedTypes")}
                   </p>
                 ) : (
                   feedStocks.map((f) => (
@@ -424,12 +467,12 @@ export default async function HomePage(props: PageProps<"/">) {
 
             <Card>
               <CardHeader>
-                <CardTitle>Raw Materials</CardTitle>
+                <CardTitle>{t("home.stockMaterialsTitle")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-1.5">
                 {materialStocks.length === 0 ? (
                   <p className="text-sm text-muted-foreground">
-                    No materials yet.
+                    {t("home.noMaterials")}
                   </p>
                 ) : (
                   materialStocks.map((m) => (
@@ -462,16 +505,16 @@ export default async function HomePage(props: PageProps<"/">) {
         <div className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              {RANGE_LABELS[range]}
+              {rangeLabels[range]}
             </h2>
             <Suspense fallback={null}>
               <SegmentedFilter
                 param="range"
                 current={range}
                 options={[
-                  { value: "week", label: "Week" },
-                  { value: "month", label: "Month" },
-                  { value: "year", label: "Year" },
+                  { value: "week", label: t("home.rangeWeekShort") },
+                  { value: "month", label: t("home.rangeMonthShort") },
+                  { value: "year", label: t("home.rangeYearShort") },
                 ]}
               />
             </Suspense>
@@ -480,18 +523,18 @@ export default async function HomePage(props: PageProps<"/">) {
             <div className="grid gap-4 lg:grid-cols-2">
               <Card>
                 <CardHeader>
-                  <CardTitle>Sales vs Purchases</CardTitle>
+                  <CardTitle>{t("home.salesVsPurchases")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <SalesPurchasesChart data={salesPurchasesData} />
                   <div className="mt-2 flex gap-4 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1.5">
                       <span className="h-2 w-2 rounded-full bg-[var(--color-chart-1)]" />
-                      Sales
+                      {t("home.sales")}
                     </span>
                     <span className="flex items-center gap-1.5">
                       <span className="h-2 w-2 rounded-full bg-[var(--color-chart-3)]" />
-                      Purchases
+                      {t("home.purchases")}
                     </span>
                   </div>
                 </CardContent>
@@ -499,18 +542,18 @@ export default async function HomePage(props: PageProps<"/">) {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Eggs: Collected vs Sold</CardTitle>
+                  <CardTitle>{t("home.eggsCollectedVsSold")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <EggTrendChart data={eggTrendData} />
                   <div className="mt-2 flex gap-4 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1.5">
                       <span className="h-2 w-2 rounded-full bg-[var(--color-chart-1)]" />
-                      Collected
+                      {t("home.collected")}
                     </span>
                     <span className="flex items-center gap-1.5">
                       <span className="h-2 w-2 rounded-full bg-[var(--color-chart-2)]" />
-                      Sold
+                      {t("home.sold")}
                     </span>
                   </div>
                 </CardContent>
@@ -518,13 +561,13 @@ export default async function HomePage(props: PageProps<"/">) {
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
-              No sales, purchases, or egg activity in this period.
+              {t("home.noActivity")}
             </p>
           )}
         </div>
       )}
 
-      <HubLinkGrid links={QUICK_LINKS} />
+      <HubLinkGrid links={buildQuickLinks(t)} />
     </div>
   );
 }

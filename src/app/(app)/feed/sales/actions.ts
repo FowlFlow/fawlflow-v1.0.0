@@ -9,17 +9,7 @@ import {
   getRawMaterialStockKg,
   getLatestUnitCost,
 } from "@/lib/stock";
-
-const saleSchema = z.object({
-  saleType: z.enum(["FEED", "MATERIAL"]),
-  itemId: z.string().min(1, "Select an item"),
-  buyerId: z.string().min(1, "Select a buyer"),
-  date: z.string().min(1, "Date is required"),
-  quantityKg: z.coerce.number().positive("Quantity must be greater than 0"),
-  pricePerKg: z.coerce.number().min(0),
-  notes: z.string().trim().max(300).optional(),
-  confirmed: z.coerce.boolean().optional(),
-});
+import { getT } from "@/lib/i18n/server";
 
 export type SaleFormState = {
   error?: string;
@@ -45,6 +35,19 @@ export async function recordSaleAction(
   _prevState: SaleFormState,
   formData: FormData,
 ): Promise<SaleFormState> {
+  const { t } = await getT();
+
+  const saleSchema = z.object({
+    saleType: z.enum(["FEED", "MATERIAL"]),
+    itemId: z.string().min(1, t("feed.sales.selectItemMsg")),
+    buyerId: z.string().min(1, t("common.select", { item: t("common.buyer") })),
+    date: z.string().min(1, t("feed.common.dateRequired")),
+    quantityKg: z.coerce.number().positive(t("feed.common.quantityPositive")),
+    pricePerKg: z.coerce.number().min(0),
+    notes: z.string().trim().max(300).optional(),
+    confirmed: z.coerce.boolean().optional(),
+  });
+
   const parsed = saleSchema.safeParse({
     saleType: formData.get("saleType"),
     itemId: formData.get("itemId"),
@@ -57,21 +60,21 @@ export async function recordSaleAction(
   });
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Please check the form." };
+    return { error: parsed.error.issues[0]?.message ?? t("feed.common.checkForm") };
   }
 
   const { saleType, itemId, buyerId, date, quantityKg, pricePerKg, notes, confirmed } =
     parsed.data;
 
   const buyer = await prisma.contact.findUnique({ where: { id: buyerId } });
-  if (!buyer) return { error: "Buyer not found." };
+  if (!buyer) return { error: t("feed.sales.buyerNotFound") };
 
   const saleDate = new Date(date);
   const totalAmount = quantityKg * pricePerKg;
 
   if (saleType === "FEED") {
     const feedType = await prisma.feedType.findUnique({ where: { id: itemId } });
-    if (!feedType) return { error: "Feed type not found." };
+    if (!feedType) return { error: t("feed.common.feedTypeNotFound") };
 
     const availableKg = await getFeedStockKg(itemId);
     const resultingKg = availableKg - quantityKg;
@@ -115,12 +118,12 @@ export async function recordSaleAction(
     });
   } else {
     const material = await prisma.rawMaterial.findUnique({ where: { id: itemId } });
-    if (!material) return { error: "Material not found." };
+    if (!material) return { error: t("feed.common.materialNotFound") };
 
     const unitCostPerKg = await getLatestUnitCost(itemId, saleDate);
     if (unitCostPerKg === null) {
       return {
-        error: `No purchase history for ${material.nameEn} yet — record a purchase for it first.`,
+        error: t("feed.sales.noPurchaseHistory", { name: material.nameEn }),
       };
     }
 
@@ -170,5 +173,5 @@ export async function recordSaleAction(
   revalidatePath("/feed/materials");
   revalidatePath("/feed/types");
   revalidatePath("/feed/sales");
-  redirect(`/feed/sales?flash=${encodeURIComponent("Sale recorded.")}`);
+  redirect(`/feed/sales?flash=${encodeURIComponent(t("feed.sales.recorded"))}`);
 }

@@ -3,8 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { SectionNav } from "@/components/section-nav";
-
-const NAV_ITEMS = [{ href: "/eggs/reports", label: "Reports" }];
+import { getT } from "@/lib/i18n/server";
 
 function toISODate(d: Date) {
   return d.toISOString().slice(0, 10);
@@ -17,6 +16,8 @@ function addDays(dateStr: string, days: number) {
 }
 
 export default async function EggReportsPage(props: PageProps<"/eggs/reports">) {
+  const { t } = await getT();
+  const navItems = [{ href: "/eggs/reports", label: t("eggs.reports.navLabel") }];
   const searchParams = await props.searchParams;
   const today = toISODate(new Date());
   const from = typeof searchParams.from === "string" ? searchParams.from : addDays(today, -6);
@@ -55,13 +56,13 @@ export default async function EggReportsPage(props: PageProps<"/eggs/reports">) 
 
   return (
     <div className="flex h-full flex-col space-y-4">
-      <SectionNav items={NAV_ITEMS} backHref="/eggs" backLabel="Eggs" />
-      <h1 className="text-xl font-bold">Egg Report</h1>
+      <SectionNav items={navItems} backHref="/eggs" backLabel={t("eggs.hub.title")} />
+      <h1 className="text-xl font-bold">{t("eggs.reports.pageTitle")}</h1>
 
       <form className="flex flex-wrap items-end gap-3">
         <div>
           <label htmlFor="from" className="mb-1 block text-sm font-medium">
-            From
+            {t("eggs.reports.from")}
           </label>
           <input
             type="date"
@@ -73,7 +74,7 @@ export default async function EggReportsPage(props: PageProps<"/eggs/reports">) 
         </div>
         <div>
           <label htmlFor="to" className="mb-1 block text-sm font-medium">
-            To
+            {t("eggs.reports.to")}
           </label>
           <input
             type="date"
@@ -85,7 +86,7 @@ export default async function EggReportsPage(props: PageProps<"/eggs/reports">) 
         </div>
         <button
           type="submit"
-          aria-label="Apply date range"
+          aria-label={t("eggs.reports.applyDateRange")}
           className={cn(buttonVariants({ variant: "outline", size: "icon-lg" }))}
         >
           <Search />
@@ -93,13 +94,13 @@ export default async function EggReportsPage(props: PageProps<"/eggs/reports">) 
       </form>
 
       {cages.length === 0 ? (
-        <p className="text-muted-foreground">No cages yet.</p>
+        <p className="text-muted-foreground">{t("eggs.reports.noCages")}</p>
       ) : (
         <div className="flex-1 overflow-y-auto overflow-x-auto rounded-lg border">
           <table className="w-full text-sm">
             <thead>
               <tr className="sticky top-0 z-10 border-b bg-muted">
-                <th className="p-2 text-left font-medium">Cage</th>
+                <th className="p-2 text-left font-medium">{t("eggs.reports.cageColumn")}</th>
                 {dates.map((date) => (
                   <th key={date} className="p-2 text-right font-medium whitespace-nowrap">
                     {new Date(date).toLocaleDateString(undefined, {
@@ -108,7 +109,7 @@ export default async function EggReportsPage(props: PageProps<"/eggs/reports">) 
                     })}
                   </th>
                 ))}
-                <th className="p-2 text-right font-medium">Total</th>
+                <th className="p-2 text-right font-medium">{t("common.total")}</th>
               </tr>
             </thead>
             <tbody>
@@ -130,7 +131,7 @@ export default async function EggReportsPage(props: PageProps<"/eggs/reports">) 
             </tbody>
             <tfoot>
               <tr className="border-t bg-muted/50 font-semibold">
-                <td className="p-2">Total</td>
+                <td className="p-2">{t("common.total")}</td>
                 {dates.map((date) => (
                   <td key={date} className="p-2 text-right">
                     {dateTotals.get(date) ?? 0}

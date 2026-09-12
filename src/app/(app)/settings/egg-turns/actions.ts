@@ -4,12 +4,16 @@ import { z } from "zod";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { getT } from "@/lib/i18n/server";
+import type { Translate } from "@/lib/i18n/translate";
 
-const turnSchema = z.object({
-  id: z.string().optional(),
-  name: z.string().trim().min(1, "Name is required").max(50),
-  sortOrder: z.coerce.number().int(),
-});
+function buildTurnSchema(t: Translate) {
+  return z.object({
+    id: z.string().optional(),
+    name: z.string().trim().min(1, t("settings.eggTurns.errors.nameRequired")).max(50),
+    sortOrder: z.coerce.number().int(),
+  });
+}
 
 export type TurnFormState = { error?: string };
 
@@ -17,6 +21,8 @@ export async function saveTurnAction(
   _prevState: TurnFormState,
   formData: FormData,
 ): Promise<TurnFormState> {
+  const { t } = await getT();
+  const turnSchema = buildTurnSchema(t);
   const parsed = turnSchema.safeParse({
     id: formData.get("id") || undefined,
     name: formData.get("name"),
@@ -24,7 +30,9 @@ export async function saveTurnAction(
   });
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Please check the form." };
+    return {
+      error: parsed.error.issues[0]?.message ?? t("settings.eggTurns.errors.checkForm"),
+    };
   }
 
   const { id, name, sortOrder } = parsed.data;
@@ -34,12 +42,14 @@ export async function saveTurnAction(
   } else {
     const existing = await prisma.eggTurn.findUnique({ where: { name } });
     if (existing) {
-      return { error: "A turn with this name already exists." };
+      return { error: t("settings.eggTurns.errors.duplicateName") };
     }
     await prisma.eggTurn.create({ data: { name, sortOrder } });
   }
 
   revalidatePath("/settings/egg-turns");
   revalidatePath("/eggs/log");
-  redirect(`/settings/egg-turns?flash=${encodeURIComponent(id ? "Turn updated." : "Turn added.")}`);
+  redirect(
+    `/settings/egg-turns?flash=${encodeURIComponent(id ? t("settings.eggTurns.flash.updated") : t("settings.eggTurns.flash.added"))}`,
+  );
 }

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useActionToast } from "@/hooks/use-action-toast";
+import { useTranslations } from "@/lib/i18n/client";
 import { saveContactAction, type ContactFormState } from "./actions";
 
 const initialState: ContactFormState = {};
@@ -28,13 +29,14 @@ export function ContactForm({
     initialState,
   );
   useActionToast(state?.error);
+  const t = useTranslations();
 
   return (
     <form action={formAction} className="max-w-md space-y-5">
       {contact && <input type="hidden" name="id" value={contact.id} />}
 
       <div className="space-y-2">
-        <Label htmlFor="name">Name</Label>
+        <Label htmlFor="name">{t("common.name")}</Label>
         <Input
           id="name"
           name="name"
@@ -45,7 +47,7 @@ export function ContactForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="phone">Phone</Label>
+        <Label htmlFor="phone">{t("contacts.phone")}</Label>
         <Input
           id="phone"
           name="phone"
@@ -55,12 +57,12 @@ export function ContactForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="address">Address</Label>
+        <Label htmlFor="address">{t("contacts.address")}</Label>
         <Input id="address" name="address" defaultValue={contact?.address ?? ""} />
       </div>
 
       <div className="space-y-2">
-        <Label>Role</Label>
+        <Label>{t("contacts.role")}</Label>
         <div className="flex gap-6">
           <label className="flex items-center gap-2 text-sm">
             <input
@@ -69,7 +71,7 @@ export function ContactForm({
               defaultChecked={contact?.isSupplier}
               className="h-4 w-4 rounded border-input"
             />
-            Supplier
+            {t("common.supplier")}
           </label>
           <label className="flex items-center gap-2 text-sm">
             <input
@@ -78,13 +80,10 @@ export function ContactForm({
               defaultChecked={contact?.isBuyer}
               className="h-4 w-4 rounded border-input"
             />
-            Buyer
+            {t("common.buyer")}
           </label>
         </div>
-        <p className="text-xs text-muted-foreground">
-          You don&apos;t have to set this now — it gets set automatically the
-          first time you buy from or sell to this contact.
-        </p>
+        <p className="text-xs text-muted-foreground">{t("contacts.roleHint")}</p>
       </div>
 
       {state?.error && (
@@ -95,7 +94,7 @@ export function ContactForm({
 
       <Button type="submit" disabled={pending}>
         {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-        {pending ? "Saving…" : "Save Contact"}
+        {pending ? t("common.saving") : t("contacts.submit")}
       </Button>
     </form>
   );

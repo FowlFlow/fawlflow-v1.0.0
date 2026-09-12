@@ -11,13 +11,14 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { SectionNav } from "@/components/section-nav";
-
-const NAV_ITEMS = [
-  { href: "/feed/types", label: "Recipes" },
-  { href: "/feed/production", label: "Production" },
-];
+import { getT } from "@/lib/i18n/server";
 
 export default async function ProductionPage() {
+  const { t } = await getT();
+  const NAV_ITEMS = [
+    { href: "/feed/types", label: t("feed.types.navLabel") },
+    { href: "/feed/production", label: t("feed.production.navLabel") },
+  ];
   const batches = await prisma.feedProductionBatch.findMany({
     where: { deletedAt: null },
     orderBy: { date: "desc" },
@@ -30,20 +31,20 @@ export default async function ProductionPage() {
 
   return (
     <div className="flex h-full flex-col space-y-4">
-      <SectionNav items={NAV_ITEMS} backHref="/feed" backLabel="Feed" />
+      <SectionNav items={NAV_ITEMS} backHref="/feed" backLabel={t("feed.hub.title")} />
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Production</h1>
+        <h1 className="text-xl font-bold">{t("feed.production.navLabel")}</h1>
         <Link
           href="/feed/production/new"
           className={cn(buttonVariants({ size: "sm" }))}
         >
-          + Produce Batch
+          + {t("feed.production.produceBatch")}
         </Link>
       </div>
 
       {batches.length === 0 ? (
         <p className="text-muted-foreground">
-          No production batches recorded yet.
+          {t("feed.production.emptyState")}
         </p>
       ) : (
         <>
@@ -64,7 +65,10 @@ export default async function ProductionPage() {
                     </p>
                   </div>
                   <div className="mt-1 flex items-center justify-between text-sm">
-                    <span>{batch.quantityProducedKg.toString()} kg produced</span>
+                    <span>
+                      {batch.quantityProducedKg.toString()} kg{" "}
+                      {t("feed.production.producedSuffix")}
+                    </span>
                     <span className="font-medium">
                       Rs.{" "}
                       {totalCost.toLocaleString(undefined, {
@@ -90,11 +94,11 @@ export default async function ProductionPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Feed Type</TableHead>
-                  <TableHead>Produced</TableHead>
-                  <TableHead>Cost</TableHead>
-                  <TableHead>Materials Used</TableHead>
+                  <TableHead>{t("common.date")}</TableHead>
+                  <TableHead>{t("feed.common.feedType")}</TableHead>
+                  <TableHead>{t("feed.production.producedHeader")}</TableHead>
+                  <TableHead>{t("feed.reports.navLabel")}</TableHead>
+                  <TableHead>{t("feed.production.materialsUsedHeader")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

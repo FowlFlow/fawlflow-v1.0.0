@@ -11,13 +11,14 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { SectionNav } from "@/components/section-nav";
-
-const NAV_ITEMS = [
-  { href: "/eggs/box-types", label: "Box Types" },
-  { href: "/eggs/sales", label: "Sales" },
-];
+import { getT } from "@/lib/i18n/server";
 
 export default async function EggSalesPage() {
+  const { t } = await getT();
+  const navItems = [
+    { href: "/eggs/box-types", label: t("eggs.boxTypes.title") },
+    { href: "/eggs/sales", label: t("eggs.sales.navLabel") },
+  ];
   const sales = await prisma.eggSale.findMany({
     where: { deletedAt: null },
     orderBy: { date: "desc" },
@@ -27,19 +28,19 @@ export default async function EggSalesPage() {
 
   return (
     <div className="flex h-full flex-col space-y-4">
-      <SectionNav items={NAV_ITEMS} backHref="/eggs" backLabel="Eggs" />
+      <SectionNav items={navItems} backHref="/eggs" backLabel={t("eggs.hub.title")} />
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Egg Sales</h1>
+        <h1 className="text-xl font-bold">{t("eggs.sales.title")}</h1>
         <Link
           href="/eggs/sales/new"
           className={cn(buttonVariants({ size: "sm" }))}
         >
-          + Record Sale
+          + {t("eggs.sales.recordSale")}
         </Link>
       </div>
 
       {sales.length === 0 ? (
-        <p className="text-muted-foreground">No egg sales recorded yet.</p>
+        <p className="text-muted-foreground">{t("eggs.sales.empty")}</p>
       ) : (
         <>
           {/* Mobile: stacked cards */}
@@ -54,12 +55,18 @@ export default async function EggSalesPage() {
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {sale.boxCount > 0 &&
-                    `${sale.boxCount} × ${sale.boxType?.name ?? "box"}`}
+                    t("eggs.sales.boxesSummary", {
+                      count: sale.boxCount,
+                      boxName: sale.boxType?.name ?? t("eggs.sales.boxFallback"),
+                    })}
                   {sale.boxCount > 0 && sale.looseEggCount > 0 && " + "}
-                  {sale.looseEggCount > 0 && `${sale.looseEggCount} loose`}
+                  {sale.looseEggCount > 0 &&
+                    t("eggs.sales.looseSummary", { count: sale.looseEggCount })}
                 </p>
                 <div className="mt-2 flex items-center justify-between text-sm">
-                  <span>{sale.totalEggCount} eggs</span>
+                  <span>
+                    {t("eggs.sales.totalEggsCount", { count: sale.totalEggCount })}
+                  </span>
                   <span className="font-medium">
                     Rs. {sale.totalAmount.toString()}
                   </span>
@@ -73,12 +80,12 @@ export default async function EggSalesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Buyer</TableHead>
-                  <TableHead>Boxes</TableHead>
-                  <TableHead>Loose</TableHead>
-                  <TableHead>Total Eggs</TableHead>
-                  <TableHead>Total</TableHead>
+                  <TableHead>{t("common.date")}</TableHead>
+                  <TableHead>{t("common.buyer")}</TableHead>
+                  <TableHead>{t("eggs.sales.boxes")}</TableHead>
+                  <TableHead>{t("eggs.sales.colLoose")}</TableHead>
+                  <TableHead>{t("eggs.sales.colTotalEggs")}</TableHead>
+                  <TableHead>{t("common.total")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -90,7 +97,10 @@ export default async function EggSalesPage() {
                     </TableCell>
                     <TableCell>
                       {sale.boxCount > 0
-                        ? `${sale.boxCount} × ${sale.boxType?.name ?? ""}`
+                        ? t("eggs.sales.boxesSummary", {
+                            count: sale.boxCount,
+                            boxName: sale.boxType?.name ?? "",
+                          })
                         : "—"}
                     </TableCell>
                     <TableCell>

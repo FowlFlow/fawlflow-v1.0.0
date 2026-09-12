@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { NativeSelect } from "@/components/ui/native-select";
 import { useActionToast } from "@/hooks/use-action-toast";
+import { useTranslations } from "@/lib/i18n/client";
 import { saveMaterialAction, type MaterialFormState } from "./actions";
 
 const initialState: MaterialFormState = {};
@@ -28,13 +29,14 @@ export function MaterialForm({
     initialState,
   );
   useActionToast(state?.error);
+  const t = useTranslations();
 
   return (
     <form action={formAction} className="max-w-md space-y-5">
       {material && <input type="hidden" name="id" value={material.id} />}
 
       <div className="space-y-2">
-        <Label htmlFor="nameEn">Name (English)</Label>
+        <Label htmlFor="nameEn">{t("feed.materials.nameEnLabel")}</Label>
         <Input
           id="nameEn"
           name="nameEn"
@@ -45,22 +47,21 @@ export function MaterialForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="nameSi">Name (Sinhala)</Label>
+        <Label htmlFor="nameSi">{t("feed.materials.nameSiLabel")}</Label>
         <Input
           id="nameSi"
           name="nameSi"
           lang="si"
-          placeholder="Optional for now"
+          placeholder={t("feed.common.optionalForNow")}
           defaultValue={material?.nameSi}
         />
         <p className="text-xs text-muted-foreground">
-          Leave blank for now if you don&apos;t have the exact term yet — you
-          can add it later.
+          {t("feed.materials.nameSiHelp")}
         </p>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="unit">Unit</Label>
+        <Label htmlFor="unit">{t("feed.materials.unitLabel")}</Label>
         <NativeSelect id="unit" name="unit" defaultValue={material?.unit ?? "KG"}>
           <option value="KG">KG</option>
           <option value="TON">Ton</option>
@@ -69,7 +70,7 @@ export function MaterialForm({
 
       <div className="space-y-2">
         <Label htmlFor="defaultSellPricePerKg">
-          Default Sell Price (per KG)
+          {t("feed.common.defaultSellPricePerKgLabel")}
         </Label>
         <Input
           id="defaultSellPricePerKg"
@@ -90,7 +91,7 @@ export function MaterialForm({
 
       <Button type="submit" disabled={pending}>
         {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-        {pending ? "Saving…" : "Save Material"}
+        {pending ? t("common.saving") : t("feed.materials.saveMaterial")}
       </Button>
     </form>
   );

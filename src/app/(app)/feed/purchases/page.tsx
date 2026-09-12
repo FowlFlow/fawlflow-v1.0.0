@@ -11,13 +11,14 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { SectionNav } from "@/components/section-nav";
-
-const NAV_ITEMS = [
-  { href: "/feed/materials", label: "Materials" },
-  { href: "/feed/purchases", label: "Purchases" },
-];
+import { getT } from "@/lib/i18n/server";
 
 export default async function PurchasesPage() {
+  const { t } = await getT();
+  const NAV_ITEMS = [
+    { href: "/feed/materials", label: t("feed.materials.navLabel") },
+    { href: "/feed/purchases", label: t("feed.purchases.navLabel") },
+  ];
   const purchases = await prisma.rawMaterialPurchase.findMany({
     where: { deletedAt: null },
     orderBy: { date: "desc" },
@@ -27,19 +28,19 @@ export default async function PurchasesPage() {
 
   return (
     <div className="flex h-full flex-col space-y-4">
-      <SectionNav items={NAV_ITEMS} backHref="/feed" backLabel="Feed" />
+      <SectionNav items={NAV_ITEMS} backHref="/feed" backLabel={t("feed.hub.title")} />
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Purchases</h1>
+        <h1 className="text-xl font-bold">{t("feed.purchases.navLabel")}</h1>
         <Link
           href="/feed/purchases/new"
           className={cn(buttonVariants({ size: "sm" }))}
         >
-          + Record Purchase
+          + {t("feed.purchases.recordPurchase")}
         </Link>
       </div>
 
       {purchases.length === 0 ? (
-        <p className="text-muted-foreground">No purchases recorded yet.</p>
+        <p className="text-muted-foreground">{t("feed.purchases.emptyState")}</p>
       ) : (
         <>
           {/* Mobile: stacked cards */}
@@ -53,7 +54,7 @@ export default async function PurchasesPage() {
                   </p>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  from {purchase.supplier.name}
+                  {t("feed.purchases.fromSupplier", { name: purchase.supplier.name })}
                 </p>
                 <div className="mt-2 flex items-center justify-between text-sm">
                   <span>
@@ -73,11 +74,11 @@ export default async function PurchasesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Material</TableHead>
-                  <TableHead>Supplier</TableHead>
-                  <TableHead>Quantity</TableHead>
-                  <TableHead>Total Cost</TableHead>
+                  <TableHead>{t("common.date")}</TableHead>
+                  <TableHead>{t("common.material")}</TableHead>
+                  <TableHead>{t("common.supplier")}</TableHead>
+                  <TableHead>{t("common.quantity")}</TableHead>
+                  <TableHead>{t("feed.purchases.totalCostHeader")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { resetPasswordAction, type ForgotPasswordState } from "./actions";
+import { useTranslations } from "@/lib/i18n/client";
 
 const initialState: ForgotPasswordState = {};
 
@@ -16,17 +17,17 @@ export default function ForgotPasswordPage() {
     resetPasswordAction,
     initialState,
   );
+  const t = useTranslations();
 
   if (state?.newRecoveryCode) {
     return (
       <div className="flex min-h-screen items-center justify-center p-6">
         <div className="w-full max-w-sm space-y-4 text-center">
           <h1 className="text-2xl font-bold text-primary">
-            Password updated
+            {t("auth.passwordUpdated")}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Save your new recovery code somewhere safe — it won&apos;t be
-            shown again.
+            {t("auth.saveRecoveryCode")}
           </p>
           <p className="rounded-lg bg-muted p-4 font-mono text-lg tracking-widest">
             {state.newRecoveryCode}
@@ -35,7 +36,7 @@ export default function ForgotPasswordPage() {
             href="/login"
             className="flex h-11 w-full items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground hover:bg-primary/90"
           >
-            Back to Sign In
+            {t("auth.backToSignIn")}
           </Link>
         </div>
       </div>
@@ -46,14 +47,14 @@ export default function ForgotPasswordPage() {
     <div className="flex min-h-screen items-center justify-center p-6">
       <div className="w-full max-w-sm">
         <h1 className="mb-2 text-2xl font-bold text-primary">
-          Reset Password
+          {t("auth.resetPassword")}
         </h1>
         <p className="mb-6 text-sm text-muted-foreground">
-          Enter your username, recovery code, and a new password.
+          {t("auth.resetPasswordDesc")}
         </p>
         <form action={formAction} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="username">User Name</Label>
+            <Label htmlFor="username">{t("auth.userName")}</Label>
             <Input
               id="username"
               name="username"
@@ -62,7 +63,7 @@ export default function ForgotPasswordPage() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="recoveryCode">Recovery Code</Label>
+            <Label htmlFor="recoveryCode">{t("auth.recoveryCode")}</Label>
             <Input
               id="recoveryCode"
               name="recoveryCode"
@@ -71,7 +72,7 @@ export default function ForgotPasswordPage() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="newPassword">New Password</Label>
+            <Label htmlFor="newPassword">{t("auth.newPassword")}</Label>
             <Input
               id="newPassword"
               name="newPassword"
@@ -93,7 +94,7 @@ export default function ForgotPasswordPage() {
             className="h-12 w-full rounded-full text-base"
           >
             {pending && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
-            {pending ? "Resetting…" : "Reset Password"}
+            {pending ? t("auth.resetting") : t("auth.resetPassword")}
           </Button>
         </form>
         <div className="mt-4 text-center">
@@ -101,7 +102,7 @@ export default function ForgotPasswordPage() {
             href="/login"
             className="text-sm text-muted-foreground underline underline-offset-2"
           >
-            Back to Sign In
+            {t("auth.backToSignIn")}
           </Link>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { BackLink } from "@/components/back-link";
+import { getT } from "@/lib/i18n/server";
 import { TurnForm } from "../../turn-form";
 
 export default async function EditTurnPage(
@@ -11,10 +12,12 @@ export default async function EditTurnPage(
 
   if (!turn) notFound();
 
+  const { t } = await getT();
+
   return (
     <div className="space-y-4">
-      <BackLink href="/settings/egg-turns" label="Egg Turns" />
-      <h1 className="text-xl font-bold">Edit Egg Turn</h1>
+      <BackLink href="/settings/egg-turns" label={t("settings.eggTurns.title")} />
+      <h1 className="text-xl font-bold">{t("settings.eggTurns.editTitle")}</h1>
       <TurnForm
         turn={{ id: turn.id, name: turn.name, sortOrder: turn.sortOrder }}
       />

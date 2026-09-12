@@ -12,13 +12,14 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { SectionNav } from "@/components/section-nav";
-
-const NAV_ITEMS = [
-  { href: "/feed/sales", label: "Sales" },
-  { href: "/feed/usage", label: "Farm Use" },
-];
+import { getT } from "@/lib/i18n/server";
 
 export default async function SalesPage() {
+  const { t } = await getT();
+  const NAV_ITEMS = [
+    { href: "/feed/sales", label: t("feed.sales.navLabel") },
+    { href: "/feed/usage", label: t("feed.usage.navLabel") },
+  ];
   const [feedSales, materialSales] = await Promise.all([
     prisma.feedSale.findMany({
       where: { deletedAt: null },
@@ -57,19 +58,19 @@ export default async function SalesPage() {
 
   return (
     <div className="flex h-full flex-col space-y-4">
-      <SectionNav items={NAV_ITEMS} backHref="/feed" backLabel="Feed" />
+      <SectionNav items={NAV_ITEMS} backHref="/feed" backLabel={t("feed.hub.title")} />
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Sales</h1>
+        <h1 className="text-xl font-bold">{t("feed.sales.navLabel")}</h1>
         <Link
           href="/feed/sales/new"
           className={cn(buttonVariants({ size: "sm" }))}
         >
-          + Record Sale
+          + {t("feed.sales.recordSale")}
         </Link>
       </div>
 
       {combined.length === 0 ? (
-        <p className="text-muted-foreground">No sales recorded yet.</p>
+        <p className="text-muted-foreground">{t("feed.sales.emptyState")}</p>
       ) : (
         <>
           {/* Mobile: stacked cards */}
@@ -79,14 +80,18 @@ export default async function SalesPage() {
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <p className="font-medium">{sale.itemName}</p>
-                    <Badge variant="secondary">{sale.type}</Badge>
+                    <Badge variant="secondary">
+                      {sale.type === "Feed"
+                        ? t("feed.common.feedBadge")
+                        : t("common.material")}
+                    </Badge>
                   </div>
                   <p className="shrink-0 text-sm text-muted-foreground">
                     {sale.date.toLocaleDateString()}
                   </p>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  to {sale.buyer}
+                  {t("feed.sales.toBuyerPrefix", { name: sale.buyer })}
                 </p>
                 <div className="mt-2 flex items-center justify-between text-sm">
                   <span>{sale.quantityKg} kg</span>
@@ -106,12 +111,12 @@ export default async function SalesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Item</TableHead>
-                  <TableHead>Buyer</TableHead>
-                  <TableHead>Quantity</TableHead>
-                  <TableHead>Total</TableHead>
+                  <TableHead>{t("common.date")}</TableHead>
+                  <TableHead>{t("feed.sales.typeHeader")}</TableHead>
+                  <TableHead>{t("feed.sales.itemHeader")}</TableHead>
+                  <TableHead>{t("common.buyer")}</TableHead>
+                  <TableHead>{t("common.quantity")}</TableHead>
+                  <TableHead>{t("common.total")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -119,7 +124,11 @@ export default async function SalesPage() {
                   <TableRow key={`${sale.type}-${sale.id}`}>
                     <TableCell>{sale.date.toLocaleDateString()}</TableCell>
                     <TableCell>
-                      <Badge variant="secondary">{sale.type}</Badge>
+                      <Badge variant="secondary">
+                        {sale.type === "Feed"
+                          ? t("feed.common.feedBadge")
+                          : t("common.material")}
+                      </Badge>
                     </TableCell>
                     <TableCell className="font-medium">{sale.itemName}</TableCell>
                     <TableCell>{sale.buyer}</TableCell>

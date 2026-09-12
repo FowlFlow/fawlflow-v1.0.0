@@ -5,13 +5,14 @@ import { buttonVariants } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
 import { cn } from "@/lib/utils";
 import { SectionNav } from "@/components/section-nav";
-
-const NAV_ITEMS = [
-  { href: "/feed/reports", label: "Cost" },
-  { href: "/feed/reports/profit", label: "Profit" },
-];
+import { getT } from "@/lib/i18n/server";
 
 export default async function ReportsPage(props: PageProps<"/feed/reports">) {
+  const { t } = await getT();
+  const NAV_ITEMS = [
+    { href: "/feed/reports", label: t("feed.reports.navLabel") },
+    { href: "/feed/reports/profit", label: t("feed.reports.profitNavLabel") },
+  ];
   const searchParams = await props.searchParams;
   const dateParam =
     typeof searchParams.date === "string" ? searchParams.date : undefined;
@@ -58,14 +59,14 @@ export default async function ReportsPage(props: PageProps<"/feed/reports">) {
 
   return (
     <div className="space-y-6">
-      <SectionNav items={NAV_ITEMS} backHref="/feed" backLabel="Feed" />
-      <h1 className="text-xl font-bold">Reports</h1>
+      <SectionNav items={NAV_ITEMS} backHref="/feed" backLabel={t("feed.hub.title")} />
+      <h1 className="text-xl font-bold">{t("feed.reports.title")}</h1>
 
       <div className="rounded-lg border p-4">
         <form className="mb-3 flex flex-wrap items-end gap-2">
           <div className="space-y-1">
             <label htmlFor="date" className="text-sm font-medium">
-              Date
+              {t("common.date")}
             </label>
             <input
               type="date"
@@ -77,7 +78,7 @@ export default async function ReportsPage(props: PageProps<"/feed/reports">) {
           </div>
           <div className="space-y-1">
             <label htmlFor="feedTypeId" className="text-sm font-medium">
-              Feed Type
+              {t("feed.common.feedType")}
             </label>
             <NativeSelect
               id="feedTypeId"
@@ -85,7 +86,7 @@ export default async function ReportsPage(props: PageProps<"/feed/reports">) {
               defaultValue={feedTypeIdParam}
               className="h-11"
             >
-              <option value="">All Feed Types</option>
+              <option value="">{t("feed.reports.allFeedTypes")}</option>
               {feedTypes.map((feedType) => (
                 <option key={feedType.id} value={feedType.id}>
                   {feedType.nameEn}
@@ -95,7 +96,7 @@ export default async function ReportsPage(props: PageProps<"/feed/reports">) {
           </div>
           <button
             type="submit"
-            aria-label="Apply filters"
+            aria-label={t("feed.reports.applyFiltersAria")}
             className={cn(buttonVariants({ variant: "outline", size: "icon-lg" }))}
           >
             <Search />
@@ -106,17 +107,18 @@ export default async function ReportsPage(props: PageProps<"/feed/reports">) {
           {dailyCost.toLocaleString(undefined, { maximumFractionDigits: 2 })}
         </p>
         <p className="text-sm text-muted-foreground">
-          Cost of raw materials used producing{" "}
-          {selectedFeedType ? selectedFeedType.nameEn : "feed"} on this date.
+          {t("feed.reports.costDescription", {
+            item: selectedFeedType ? selectedFeedType.nameEn : t("feed.reports.feedFallback"),
+          })}
         </p>
       </div>
 
       <div className="rounded-lg border p-4">
-        <h2 className="mb-3 font-semibold">Stock Summary</h2>
+        <h2 className="mb-3 font-semibold">{t("feed.reports.stockSummary")}</h2>
         <div className="grid gap-6 sm:grid-cols-2">
           <div>
             <p className="mb-2 text-sm font-medium text-muted-foreground">
-              Raw Materials
+              {t("feed.reports.rawMaterialsLabel")}
             </p>
             <ul className="space-y-1 text-sm">
               {materials.map((material, i) => (
@@ -135,13 +137,13 @@ export default async function ReportsPage(props: PageProps<"/feed/reports">) {
                 </li>
               ))}
               {materials.length === 0 && (
-                <li className="text-muted-foreground">None yet.</li>
+                <li className="text-muted-foreground">{t("common.none")}</li>
               )}
             </ul>
           </div>
           <div>
             <p className="mb-2 text-sm font-medium text-muted-foreground">
-              Feed
+              {t("feed.reports.feedStockLabel")}
             </p>
             <ul className="space-y-1 text-sm">
               {feedTypes.map((feedType, i) => (
@@ -158,7 +160,7 @@ export default async function ReportsPage(props: PageProps<"/feed/reports">) {
                 </li>
               ))}
               {feedTypes.length === 0 && (
-                <li className="text-muted-foreground">None yet.</li>
+                <li className="text-muted-foreground">{t("common.none")}</li>
               )}
             </ul>
           </div>

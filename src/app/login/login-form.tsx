@@ -8,20 +8,22 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { loginAction, type LoginState } from "./actions";
+import { useTranslations } from "@/lib/i18n/client";
 
 const initialState: LoginState = {};
 
 export function LoginForm() {
   const [state, formAction, pending] = useActionState(loginAction, initialState);
+  const t = useTranslations();
 
   return (
     <form action={formAction} className="space-y-5">
       <div className="space-y-2">
-        <Label htmlFor="username">User Name</Label>
+        <Label htmlFor="username">{t("auth.userName")}</Label>
         <Input
           id="username"
           name="username"
-          placeholder="john Deo"
+          placeholder={t("auth.usernamePlaceholder")}
           required
           autoFocus
           autoComplete="username"
@@ -29,12 +31,12 @@ export function LoginForm() {
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password">{t("common.password")}</Label>
         <Input
           id="password"
           name="password"
           type="password"
-          placeholder="Enter your password"
+          placeholder={t("auth.passwordPlaceholder")}
           required
           autoComplete="current-password"
           className="h-11 rounded-full px-4"
@@ -44,7 +46,7 @@ export function LoginForm() {
             href="/forgot-password"
             className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
           >
-            Forgot Password
+            {t("auth.forgotPassword")}
           </Link>
         </div>
       </div>
@@ -61,7 +63,7 @@ export function LoginForm() {
         className="h-12 w-full rounded-full text-base"
       >
         {pending && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
-        {pending ? "Signing in…" : "Sign In"}
+        {pending ? t("auth.signingIn") : t("auth.signIn")}
       </Button>
     </form>
   );

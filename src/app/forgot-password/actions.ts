@@ -3,6 +3,7 @@
 import { randomBytes } from "node:crypto";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { getT } from "@/lib/i18n/server";
 
 export type ForgotPasswordState = { error?: string; newRecoveryCode?: string };
 
@@ -10,6 +11,7 @@ export async function resetPasswordAction(
   _prevState: ForgotPasswordState,
   formData: FormData,
 ): Promise<ForgotPasswordState> {
+  const { t } = await getT();
   const username = formData.get("username");
   const recoveryCode = formData.get("recoveryCode");
   const newPassword = formData.get("newPassword");
@@ -22,15 +24,15 @@ export async function resetPasswordAction(
     !recoveryCode ||
     !newPassword
   ) {
-    return { error: "Please fill in all fields." };
+    return { error: t("auth.errorFillAllFields") };
   }
   if (newPassword.length < 8) {
-    return { error: "New password must be at least 8 characters." };
+    return { error: t("auth.errorPasswordTooShort") };
   }
 
   const user = await prisma.user.findUnique({ where: { username } });
   if (!user) {
-    return { error: "Username or recovery code is incorrect." };
+    return { error: t("auth.errorInvalidRecovery") };
   }
 
   const codeValid = await bcrypt.compare(
@@ -38,7 +40,7 @@ export async function resetPasswordAction(
     user.recoveryCodeHash,
   );
   if (!codeValid) {
-    return { error: "Username or recovery code is incorrect." };
+    return { error: t("auth.errorInvalidRecovery") };
   }
 
   const newRecoveryCode = randomBytes(5).toString("hex").toUpperCase();

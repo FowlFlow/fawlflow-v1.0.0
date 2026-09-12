@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useActionToast } from "@/hooks/use-action-toast";
+import { useTranslations } from "@/lib/i18n/client";
 import { saveBoxTypeAction, type BoxTypeFormState } from "./actions";
 
 const initialState: BoxTypeFormState = {};
@@ -21,25 +22,26 @@ export function BoxTypeForm({
     initialState,
   );
   useActionToast(state?.error);
+  const t = useTranslations();
 
   return (
     <form action={formAction} className="max-w-md space-y-5">
       {boxType && <input type="hidden" name="id" value={boxType.id} />}
 
       <div className="space-y-2">
-        <Label htmlFor="name">Box Name</Label>
+        <Label htmlFor="name">{t("eggs.boxTypes.form.nameLabel")}</Label>
         <Input
           id="name"
           name="name"
           required
           autoFocus
-          placeholder="e.g. 260-egg box"
+          placeholder={t("eggs.boxTypes.form.namePlaceholder")}
           defaultValue={boxType?.name}
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="eggsPerBox">Eggs per Box</Label>
+        <Label htmlFor="eggsPerBox">{t("eggs.boxTypes.eggsPerBoxLabel")}</Label>
         <Input
           id="eggsPerBox"
           name="eggsPerBox"
@@ -59,7 +61,7 @@ export function BoxTypeForm({
 
       <Button type="submit" disabled={pending}>
         {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-        {pending ? "Saving…" : "Save Box Type"}
+        {pending ? t("common.saving") : t("eggs.boxTypes.form.save")}
       </Button>
     </form>
   );

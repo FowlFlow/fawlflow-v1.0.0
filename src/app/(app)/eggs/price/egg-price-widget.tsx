@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useActionToast } from "@/hooks/use-action-toast";
+import { useTranslations } from "@/lib/i18n/client";
 import { setEggPriceAction, type EggPriceFormState } from "./actions";
 
 const initialState: EggPriceFormState = {};
@@ -19,10 +20,11 @@ export function EggPriceWidget({ currentPrice }: { currentPrice: number | null }
   const [priceInput, setPriceInput] = useState(currentPrice?.toString() ?? "");
   const [handledState, setHandledState] = useState(state);
   useActionToast(state?.error);
+  const t = useTranslations();
 
   useEffect(() => {
-    if (state?.success) toast.success("Egg price updated.");
-  }, [state]);
+    if (state?.success) toast.success(t("eggs.price.updatedToast"));
+  }, [state, t]);
 
   if (state !== handledState) {
     setHandledState(state);
@@ -38,14 +40,14 @@ export function EggPriceWidget({ currentPrice }: { currentPrice: number | null }
     return (
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-sm text-muted-foreground">Today&apos;s egg price</p>
+          <p className="text-sm text-muted-foreground">{t("eggs.price.todaysPrice")}</p>
           <p className="text-2xl font-bold">
-            {currentPrice != null ? `Rs. ${currentPrice.toFixed(2)}` : "Not set"}
+            {currentPrice != null ? `Rs. ${currentPrice.toFixed(2)}` : t("eggs.price.notSet")}
           </p>
         </div>
         <Button type="button" variant="outline" size="sm" onClick={startEditing}>
           <Pencil className="h-3.5 w-3.5" />
-          Update
+          {t("common.update")}
         </Button>
       </div>
     );
@@ -54,7 +56,7 @@ export function EggPriceWidget({ currentPrice }: { currentPrice: number | null }
   return (
     <form action={formAction} className="space-y-2">
       <label htmlFor="pricePerEgg" className="text-sm text-muted-foreground">
-        Today&apos;s egg price (Rs. per egg)
+        {t("eggs.price.perEggLabel")}
       </label>
       <div className="flex gap-2">
         <Input
@@ -72,7 +74,7 @@ export function EggPriceWidget({ currentPrice }: { currentPrice: number | null }
         />
         <Button type="submit" size="sm" disabled={pending}>
           {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-          {pending ? "Saving…" : "Save"}
+          {pending ? t("common.saving") : t("common.save")}
         </Button>
         <Button
           type="button"
@@ -81,7 +83,7 @@ export function EggPriceWidget({ currentPrice }: { currentPrice: number | null }
           onClick={() => setEditing(false)}
           disabled={pending}
         >
-          Cancel
+          {t("common.cancel")}
         </Button>
       </div>
       {state?.error && (

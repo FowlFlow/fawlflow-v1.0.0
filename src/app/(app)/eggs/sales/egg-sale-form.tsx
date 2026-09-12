@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { NativeSelect } from "@/components/ui/native-select";
 import { useActionToast } from "@/hooks/use-action-toast";
+import { useTranslations } from "@/lib/i18n/client";
 import { recordEggSaleAction, type EggSaleFormState } from "./actions";
 
 const initialState: EggSaleFormState = {};
@@ -26,6 +27,7 @@ export function EggSaleForm({
     initialState,
   );
   useActionToast(state?.error);
+  const t = useTranslations();
   const today = new Date().toISOString().slice(0, 10);
 
   const [boxTypeId, setBoxTypeId] = useState("");
@@ -70,9 +72,11 @@ export function EggSaleForm({
           <AlertDescription>
             {state.shortage && (
               <p>
-                Selling {state.shortage.requestedCount} eggs but only{" "}
-                {state.shortage.availableCount} in stock (
-                {state.shortage.resultingCount} after this)
+                {t("eggs.sales.form.shortageMessage", {
+                  requestedCount: state.shortage.requestedCount,
+                  availableCount: state.shortage.availableCount,
+                  resultingCount: state.shortage.resultingCount,
+                })}
               </p>
             )}
           </AlertDescription>
@@ -80,7 +84,7 @@ export function EggSaleForm({
 
         <Button type="submit" variant="destructive" disabled={pending}>
           {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-          {pending ? "Recording…" : "Sell Anyway"}
+          {pending ? t("common.recording") : t("eggs.sales.sellAnyway")}
         </Button>
       </form>
     );
@@ -89,13 +93,13 @@ export function EggSaleForm({
   return (
     <form action={formAction} className="max-w-lg space-y-5">
       <div className="space-y-2">
-        <Label htmlFor="buyerId">Buyer</Label>
+        <Label htmlFor="buyerId">{t("common.buyer")}</Label>
         {buyers.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No contacts yet.</p>
+          <p className="text-sm text-muted-foreground">{t("eggs.sales.form.noContacts")}</p>
         ) : (
           <NativeSelect id="buyerId" name="buyerId" required defaultValue="">
             <option value="" disabled>
-              Select a buyer
+              {t("eggs.sales.selectBuyer")}
             </option>
             {buyers.map((buyer) => (
               <option key={buyer.id} value={buyer.id}>
@@ -107,22 +111,22 @@ export function EggSaleForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="date">Date</Label>
+        <Label htmlFor="date">{t("common.date")}</Label>
         <Input id="date" name="date" type="date" required defaultValue={today} />
       </div>
 
       <div className="space-y-4 rounded-lg border p-4">
-        <p className="text-sm font-medium">Boxes</p>
+        <p className="text-sm font-medium">{t("eggs.sales.boxes")}</p>
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-2">
-            <Label htmlFor="boxTypeId">Box Type</Label>
+            <Label htmlFor="boxTypeId">{t("eggs.sales.form.boxTypeLabel")}</Label>
             <NativeSelect
               id="boxTypeId"
               name="boxTypeId"
               value={boxTypeId}
               onChange={(e) => setBoxTypeId(e.target.value)}
             >
-              <option value="">None</option>
+              <option value="">{t("eggs.sales.form.noneOption")}</option>
               {boxTypes.map((boxType) => (
                 <option key={boxType.id} value={boxType.id}>
                   {boxType.name}
@@ -131,7 +135,7 @@ export function EggSaleForm({
             </NativeSelect>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="boxCount">Box Count</Label>
+            <Label htmlFor="boxCount">{t("eggs.sales.form.boxCountLabel")}</Label>
             <Input
               id="boxCount"
               name="boxCount"
@@ -146,7 +150,7 @@ export function EggSaleForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="looseEggCount">Loose Eggs (not in a box)</Label>
+          <Label htmlFor="looseEggCount">{t("eggs.sales.form.looseEggCountLabel")}</Label>
           <Input
             id="looseEggCount"
             name="looseEggCount"
@@ -161,11 +165,10 @@ export function EggSaleForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="ratePerEgg">Rate per Egg (Rs.)</Label>
+        <Label htmlFor="ratePerEgg">{t("eggs.sales.form.ratePerEggLabel")}</Label>
         {defaultRatePerEgg != null && (
           <p className="text-xs text-muted-foreground">
-            Prefilled from today&apos;s egg price — change it if this sale is
-            different.
+            {t("eggs.sales.form.prefilledNote")}
           </p>
         )}
         <Input
@@ -183,11 +186,11 @@ export function EggSaleForm({
 
       <div className="space-y-1 rounded-lg bg-muted p-4 text-sm">
         <div className="flex justify-between">
-          <span className="text-muted-foreground">Total eggs</span>
+          <span className="text-muted-foreground">{t("eggs.sales.form.totalEggsLabel")}</span>
           <span className="font-medium">{totalEggs}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-muted-foreground">Total amount</span>
+          <span className="text-muted-foreground">{t("eggs.sales.form.totalAmountLabel")}</span>
           <span className="font-medium">
             Rs.{" "}
             {totalAmount.toLocaleString(undefined, {
@@ -198,7 +201,7 @@ export function EggSaleForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="notes">Notes</Label>
+        <Label htmlFor="notes">{t("common.notes")}</Label>
         <Input id="notes" name="notes" />
       </div>
 
@@ -210,7 +213,7 @@ export function EggSaleForm({
 
       <Button type="submit" disabled={pending || buyers.length === 0}>
         {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-        {pending ? "Recording…" : "Record Sale"}
+        {pending ? t("common.recording") : t("eggs.sales.recordSale")}
       </Button>
     </form>
   );

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useActionToast } from "@/hooks/use-action-toast";
+import { useTranslations } from "@/lib/i18n/client";
 import {
   regenerateRecoveryCodeAction,
   type RegenerateCodeState,
@@ -19,9 +20,10 @@ export function RecoveryCodeForm() {
     initialState,
   );
   useActionToast(state?.error);
+  const t = useTranslations();
   useEffect(() => {
-    if (state?.newCode) toast.success("New recovery code generated.");
-  }, [state?.newCode]);
+    if (state?.newCode) toast.success(t("settings.recoveryCode.toastGenerated"));
+  }, [state?.newCode, t]);
 
   return (
     <form action={formAction} className="max-w-sm space-y-3">
@@ -29,7 +31,7 @@ export function RecoveryCodeForm() {
         <Alert>
           <AlertDescription>
             <p className="mb-1 font-medium">
-              New recovery code (save this now, it won&apos;t be shown again):
+              {t("settings.recoveryCode.newCodeLabel")}
             </p>
             <p className="font-mono text-lg tracking-widest">
               {state.newCode}
@@ -45,7 +47,7 @@ export function RecoveryCodeForm() {
 
       <Button type="submit" variant="outline" disabled={pending}>
         {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-        {pending ? "Generating…" : "Generate New Recovery Code"}
+        {pending ? t("settings.recoveryCode.generating") : t("settings.recoveryCode.submit")}
       </Button>
     </form>
   );

@@ -4,13 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, Wheat, Egg, Users, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "@/lib/i18n/client";
 
 const NAV_ITEMS = [
-  { href: "/", label: "Home", icon: Home, match: "/" },
-  { href: "/feed", label: "Feed", icon: Wheat, match: "/feed" },
-  { href: "/eggs", label: "Eggs", icon: Egg, match: "/eggs" },
-  { href: "/contacts", label: "Contacts", icon: Users, match: "/contacts" },
-  { href: "/settings", label: "Settings", icon: Settings, match: "/settings" },
+  { href: "/", labelKey: "nav.home", icon: Home, match: "/" },
+  { href: "/feed", labelKey: "nav.feed", icon: Wheat, match: "/feed" },
+  { href: "/eggs", labelKey: "nav.eggs", icon: Egg, match: "/eggs" },
+  { href: "/contacts", labelKey: "nav.contacts", icon: Users, match: "/contacts" },
+  { href: "/settings", labelKey: "nav.settings", icon: Settings, match: "/settings" },
 ];
 
 function isActive(pathname: string, match: string) {
@@ -20,6 +21,7 @@ function isActive(pathname: string, match: string) {
 
 export function AppNav() {
   const pathname = usePathname();
+  const t = useTranslations();
 
   return (
     <>
@@ -39,7 +41,7 @@ export function AppNav() {
               )}
             >
               <Icon className="h-5 w-5" />
-              {item.label}
+              {t(item.labelKey)}
             </Link>
           );
         })}
@@ -59,7 +61,7 @@ export function AppNav() {
               )}
             >
               <Icon className="h-5 w-5" />
-              {item.label}
+              {t(item.labelKey)}
             </Link>
           );
         })}
