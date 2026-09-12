@@ -21,7 +21,7 @@ export default async function LoginPage() {
         <div className="w-full max-w-sm">
           <div className="mb-10 flex items-center gap-2">
             <Image src="/logo-icon.svg" alt="" width={40} height={38} />
-            <span className="text-2xl font-bold">FowlFlow</span>
+            <span className="text-2xl font-bold">FawlFlow</span>
           </div>
           <h1 className="mb-6 text-2xl font-bold text-primary">
             {t("auth.getStarted")}

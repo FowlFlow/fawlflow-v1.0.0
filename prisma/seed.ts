@@ -42,7 +42,7 @@ async function main() {
 
   const existingUser = await prisma.user.findUnique({ where: { username: "admin" } });
   if (!existingUser) {
-    const password = "fowlflow123";
+    const password = "fawlflow123";
     const recoveryCode = generateRecoveryCode();
 
     await prisma.user.create({
@@ -53,7 +53,7 @@ async function main() {
       },
     });
 
-    console.log("\n=== FowlFlow initial login ===");
+    console.log("\n=== FawlFlow initial login ===");
     console.log(`Username: admin`);
     console.log(`Password: ${password}`);
     console.log(`Recovery code (save this, shown only once): ${recoveryCode}`);

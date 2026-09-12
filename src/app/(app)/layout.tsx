@@ -21,7 +21,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
       <header className="flex shrink-0 items-center justify-between border-b px-4 py-3 md:px-6">
         <div className="flex items-center gap-2">
           <Image src="/logo-icon.svg" alt="" width={28} height={26} />
-          <span className="text-lg font-bold">FowlFlow</span>
+          <span className="text-lg font-bold">FawlFlow</span>
         </div>
         <div className="flex items-center gap-3 text-sm text-muted-foreground">
           <LanguageToggle />

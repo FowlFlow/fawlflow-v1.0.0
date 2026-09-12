@@ -18,7 +18,7 @@ const notoSansSinhala = Noto_Sans_Sinhala({
 });
 
 export const metadata: Metadata = {
-  title: "FowlFlow",
+  title: "FawlFlow",
   description: "Feed and farm management for your poultry farm",
 };
 

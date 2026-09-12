@@ -55,12 +55,25 @@ export function AppNav() {
             <Link
               key={item.href}
               href={item.href}
+              aria-current={active ? "page" : undefined}
               className={cn(
-                "flex flex-1 flex-col items-center gap-1 py-2.5 text-xs font-medium",
-                active ? "text-primary" : "text-muted-foreground",
+                "relative flex flex-1 flex-col items-center gap-0.5 py-2 text-xs",
+                active
+                  ? "font-semibold text-primary"
+                  : "font-medium text-muted-foreground",
               )}
             >
-              <Icon className="h-5 w-5" />
+              {active && (
+                <span className="absolute inset-x-4 top-0 h-0.5 rounded-full bg-primary" />
+              )}
+              <span
+                className={cn(
+                  "flex h-8 w-9 items-center justify-center rounded-full transition-colors",
+                  active && "bg-secondary text-secondary-foreground",
+                )}
+              >
+                <Icon className="h-5 w-5" />
+              </span>
               {t(item.labelKey)}
             </Link>
           );

@@ -1,4 +1,4 @@
-# FowlFlow
+# FawlFlow
 
 A mobile-first farm management app for a chicken farm's two operations: **feed** (raw materials, recipes, production, sales, pricing, profit) and **eggs** (cages, daily collection, sales). Single-user, built to run for free on Vercel + Neon.
 

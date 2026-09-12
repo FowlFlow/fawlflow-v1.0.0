@@ -4,7 +4,7 @@ export const homeEn: Dict = {
   goodMorning: "Good morning",
   goodAfternoon: "Good afternoon",
   goodEvening: "Good evening",
-  welcomeTitle: "Welcome to FowlFlow",
+  welcomeTitle: "Welcome to FawlFlow",
   welcomeBody:
     "Your farm is set up but still empty. Start by adding a cage and a raw material or two — stock, reports, and charts here will fill in as you go.",
   addCage: "Add a Cage",
@@ -52,7 +52,7 @@ export const homeSi: Dict = {
   goodMorning: "සුභ උදෑසනක්",
   goodAfternoon: "සුභ දහවලක්",
   goodEvening: "සුභ සන්ධ්‍යාවක්",
-  welcomeTitle: "FowlFlow වෙත සාදරයෙන් පිළිගනිමු",
+  welcomeTitle: "FawlFlow වෙත සාදරයෙන් පිළිගනිමු",
   welcomeBody:
     "ඔබේ ගොවිපොල සකසා ඇති නමුත් තවම හිස්ය. කූඩුවක් සහ අමුද්‍රව්‍ය එකක් දෙකක් Add කිරීමෙන් පටන් ගන්න — තොගය, වාර්තා සහ ප්‍රස්ථාර ඔබ ඉදිරියට යනවිට පිරී යනු ඇත.",
   addCage: "කූඩුවක් Add කරන්න",
