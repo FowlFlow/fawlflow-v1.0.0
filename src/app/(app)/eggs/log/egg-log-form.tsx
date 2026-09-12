@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -17,14 +17,13 @@ export function EggLogForm({
   cages,
   turns,
   date,
-  existing,
 }: {
   cages: { id: string; name: string }[];
   turns: { id: string; name: string }[];
   date: string;
-  existing: Record<string, number>;
 }) {
   const router = useRouter();
+  const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction, pending] = useActionState(
     saveEggLogAction,
     initialState,
@@ -32,8 +31,11 @@ export function EggLogForm({
   useActionToast(state?.error);
   const t = useTranslations();
   useEffect(() => {
-    if (state?.success) toast.success(t("eggs.log.savedToast"));
-  }, [state?.success, t]);
+    if (state?.savedAt) {
+      toast.success(t("eggs.log.savedToast"));
+      formRef.current?.reset();
+    }
+  }, [state?.savedAt, t]);
 
   return (
     <div className="space-y-4">
@@ -50,8 +52,9 @@ export function EggLogForm({
         />
       </div>
 
-      <form action={formAction} className="space-y-4">
+      <form ref={formRef} action={formAction} className="space-y-4">
         <input type="hidden" name="date" value={date} />
+        <p className="text-xs text-muted-foreground">{t("eggs.log.gridHelp")}</p>
         <div className="overflow-x-auto rounded-lg border">
           <table className="w-full text-sm">
             <thead>
@@ -78,7 +81,6 @@ export function EggLogForm({
                         step="1"
                         inputMode="numeric"
                         name={`cell:${cage.id}:${turn.id}`}
-                        defaultValue={existing[`${cage.id}:${turn.id}`] ?? ""}
                         className="w-20"
                       />
                     </td>
@@ -94,12 +96,6 @@ export function EggLogForm({
             <AlertDescription>{state.error}</AlertDescription>
           </Alert>
         )}
-        {state?.success && (
-          <Alert>
-            <AlertDescription>{t("eggs.log.saved")}</AlertDescription>
-          </Alert>
-        )}
-
         <Button type="submit" disabled={pending}>
           {pending && <Loader2 className="h-4 w-4 animate-spin" />}
           {pending ? t("common.saving") : t("common.save")}

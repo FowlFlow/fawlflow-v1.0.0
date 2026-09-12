@@ -9,7 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { NativeSelect } from "@/components/ui/native-select";
 import { cn } from "@/lib/utils";
 import { useActionToast } from "@/hooks/use-action-toast";
-import { recordSaleAction, type SaleFormState } from "./actions";
+import { recordSaleAction, updateSaleAction, type SaleFormState } from "./actions";
 import { useTranslations } from "@/lib/i18n/client";
 
 const initialState: SaleFormState = {};
@@ -24,19 +24,30 @@ export function SaleForm({
   feedTypes,
   materials,
   buyers,
+  sale,
 }: {
   feedTypes: SellableItem[];
   materials: SellableItem[];
   buyers: { id: string; name: string }[];
+  sale?: {
+    id: string;
+    saleType: "FEED" | "MATERIAL";
+    itemId: string;
+    buyerId: string;
+    date: string;
+    quantityKg: string;
+    pricePerKg: string;
+    notes?: string;
+  };
 }) {
   const [state, formAction, pending] = useActionState(
-    recordSaleAction,
+    sale ? updateSaleAction : recordSaleAction,
     initialState,
   );
   useActionToast(state?.error);
   const t = useTranslations();
   const [saleType, setSaleType] = useState<"FEED" | "MATERIAL">(
-    (state?.formValues?.saleType as "FEED" | "MATERIAL") ?? "FEED",
+    sale?.saleType ?? (state?.formValues?.saleType as "FEED" | "MATERIAL") ?? "FEED",
   );
   const priceInputRef = useRef<HTMLInputElement>(null);
   const today = new Date().toISOString().slice(0, 10);
@@ -52,6 +63,7 @@ export function SaleForm({
   if (state?.needsConfirmation && state.formValues) {
     return (
       <form action={formAction} className="max-w-lg space-y-4">
+        {sale && <input type="hidden" name="id" value={sale.id} />}
         <input type="hidden" name="saleType" value={state.formValues.saleType} />
         <input type="hidden" name="itemId" value={state.formValues.itemId} />
         <input type="hidden" name="buyerId" value={state.formValues.buyerId} />
@@ -94,34 +106,41 @@ export function SaleForm({
 
   return (
     <form action={formAction} className="max-w-lg space-y-5">
+      {sale && <input type="hidden" name="id" value={sale.id} />}
       <div className="space-y-2">
         <Label>{t("feed.sales.whatSelling")}</Label>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => setSaleType("FEED")}
-            className={cn(
-              "flex-1 rounded-lg border px-3 py-2 text-sm font-medium",
-              saleType === "FEED"
-                ? "border-primary bg-secondary text-secondary-foreground"
-                : "text-muted-foreground",
-            )}
-          >
-            {t("feed.common.feedBadge")}
-          </button>
-          <button
-            type="button"
-            onClick={() => setSaleType("MATERIAL")}
-            className={cn(
-              "flex-1 rounded-lg border px-3 py-2 text-sm font-medium",
-              saleType === "MATERIAL"
-                ? "border-primary bg-secondary text-secondary-foreground"
-                : "text-muted-foreground",
-            )}
-          >
-            {t("feed.sales.materialToggle")}
-          </button>
-        </div>
+        {sale ? (
+          <div className="w-fit rounded-lg border border-primary bg-secondary px-3 py-2 text-sm font-medium text-secondary-foreground">
+            {saleType === "FEED" ? t("feed.common.feedBadge") : t("common.material")}
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setSaleType("FEED")}
+              className={cn(
+                "flex-1 rounded-lg border px-3 py-2 text-sm font-medium",
+                saleType === "FEED"
+                  ? "border-primary bg-secondary text-secondary-foreground"
+                  : "text-muted-foreground",
+              )}
+            >
+              {t("feed.common.feedBadge")}
+            </button>
+            <button
+              type="button"
+              onClick={() => setSaleType("MATERIAL")}
+              className={cn(
+                "flex-1 rounded-lg border px-3 py-2 text-sm font-medium",
+                saleType === "MATERIAL"
+                  ? "border-primary bg-secondary text-secondary-foreground"
+                  : "text-muted-foreground",
+              )}
+            >
+              {t("feed.sales.materialToggle")}
+            </button>
+          </div>
+        )}
         <input type="hidden" name="saleType" value={saleType} />
       </div>
 
@@ -138,7 +157,7 @@ export function SaleForm({
             id="itemId"
             name="itemId"
             required
-            defaultValue=""
+            defaultValue={sale?.itemId ?? ""}
             onChange={handleItemChange}
             key={saleType}
           >
@@ -161,7 +180,7 @@ export function SaleForm({
         {buyers.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t("feed.common.noContactsYet")}</p>
         ) : (
-          <NativeSelect id="buyerId" name="buyerId" required defaultValue="">
+          <NativeSelect id="buyerId" name="buyerId" required defaultValue={sale?.buyerId ?? ""}>
             <option value="" disabled>
               {t("feed.sales.selectBuyer")}
             </option>
@@ -176,7 +195,7 @@ export function SaleForm({
 
       <div className="space-y-2">
         <Label htmlFor="date">{t("common.date")}</Label>
-        <Input id="date" name="date" type="date" required defaultValue={today} />
+        <Input id="date" name="date" type="date" required defaultValue={sale?.date ?? today} />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -190,6 +209,7 @@ export function SaleForm({
             min="0"
             inputMode="decimal"
             required
+            defaultValue={sale?.quantityKg}
           />
         </div>
         <div className="space-y-2">
@@ -203,13 +223,14 @@ export function SaleForm({
             min="0"
             inputMode="decimal"
             required
+            defaultValue={sale?.pricePerKg}
           />
         </div>
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="notes">{t("common.notes")}</Label>
-        <Input id="notes" name="notes" />
+        <Input id="notes" name="notes" defaultValue={sale?.notes} />
       </div>
 
       {state?.error && (
@@ -223,7 +244,11 @@ export function SaleForm({
         disabled={pending || items.length === 0 || buyers.length === 0}
       >
         {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-        {pending ? t("common.recording") : t("feed.sales.recordSale")}
+        {pending
+          ? t("common.recording")
+          : sale
+            ? t("feed.sales.saveSale")
+            : t("feed.sales.recordSale")}
       </Button>
     </form>
   );

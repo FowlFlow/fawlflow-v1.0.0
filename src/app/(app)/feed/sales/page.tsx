@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Pencil } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +13,9 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { SectionNav } from "@/components/section-nav";
+import { DeleteButton } from "@/components/delete-button";
 import { getT } from "@/lib/i18n/server";
+import { deleteSaleAction } from "./actions";
 
 export default async function SalesPage() {
   const { t } = await getT();
@@ -86,9 +89,30 @@ export default async function SalesPage() {
                         : t("common.material")}
                     </Badge>
                   </div>
-                  <p className="shrink-0 text-sm text-muted-foreground">
-                    {sale.date.toLocaleDateString()}
-                  </p>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <p className="text-sm text-muted-foreground">
+                      {sale.date.toLocaleDateString()}
+                    </p>
+                    <Link
+                      href={`/feed/sales/${sale.id}/edit?type=${sale.type}`}
+                      aria-label={t("feed.sales.editAria")}
+                      className={cn(
+                        buttonVariants({ variant: "ghost", size: "icon-lg" }),
+                        "text-muted-foreground",
+                      )}
+                    >
+                      <Pencil />
+                    </Link>
+                    <DeleteButton
+                      action={deleteSaleAction.bind(
+                        null,
+                        sale.id,
+                        sale.type === "Feed" ? "FEED" : "MATERIAL",
+                      )}
+                      confirmMessage={t("common.confirmDelete")}
+                      label={t("feed.sales.deleteAria")}
+                    />
+                  </div>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {t("feed.sales.toBuyerPrefix", { name: sale.buyer })}
@@ -117,6 +141,7 @@ export default async function SalesPage() {
                   <TableHead>{t("common.buyer")}</TableHead>
                   <TableHead>{t("common.quantity")}</TableHead>
                   <TableHead>{t("common.total")}</TableHead>
+                  <TableHead className="text-right">{t("common.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -138,6 +163,29 @@ export default async function SalesPage() {
                       {sale.totalAmount.toLocaleString(undefined, {
                         maximumFractionDigits: 2,
                       })}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-1">
+                        <Link
+                          href={`/feed/sales/${sale.id}/edit?type=${sale.type}`}
+                          aria-label={t("feed.sales.editAria")}
+                          className={cn(
+                            buttonVariants({ variant: "ghost", size: "icon-lg" }),
+                            "text-muted-foreground",
+                          )}
+                        >
+                          <Pencil />
+                        </Link>
+                        <DeleteButton
+                          action={deleteSaleAction.bind(
+                            null,
+                            sale.id,
+                            sale.type === "Feed" ? "FEED" : "MATERIAL",
+                          )}
+                          confirmMessage={t("common.confirmDelete")}
+                          label={t("feed.sales.deleteAria")}
+                        />
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

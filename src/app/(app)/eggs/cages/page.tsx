@@ -12,7 +12,9 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { SectionNav } from "@/components/section-nav";
+import { DeleteButton } from "@/components/delete-button";
 import { getT } from "@/lib/i18n/server";
+import { deactivateCageAction } from "./actions";
 
 export default async function CagesPage() {
   const { t } = await getT();
@@ -57,16 +59,23 @@ export default async function CagesPage() {
                     })}
                   </p>
                 </div>
-                <Link
-                  href={`/eggs/cages/${cage.id}/edit`}
-                  aria-label={t("eggs.cages.editAria")}
-                  className={cn(
-                    buttonVariants({ variant: "ghost", size: "icon-lg" }),
-                    "text-muted-foreground",
-                  )}
-                >
-                  <Pencil />
-                </Link>
+                <div className="flex shrink-0 items-center gap-1">
+                  <Link
+                    href={`/eggs/cages/${cage.id}/edit`}
+                    aria-label={t("eggs.cages.editAria")}
+                    className={cn(
+                      buttonVariants({ variant: "ghost", size: "icon-lg" }),
+                      "text-muted-foreground",
+                    )}
+                  >
+                    <Pencil />
+                  </Link>
+                  <DeleteButton
+                    action={deactivateCageAction.bind(null, cage.id)}
+                    confirmMessage={t("common.confirmDelete")}
+                    label={t("eggs.cages.deactivateAria")}
+                  />
+                </div>
               </div>
             ))}
           </div>
@@ -87,16 +96,23 @@ export default async function CagesPage() {
                     <TableCell className="font-medium">{cage.name}</TableCell>
                     <TableCell>{cage.currentChickenCount}</TableCell>
                     <TableCell>
-                      <Link
-                        href={`/eggs/cages/${cage.id}/edit`}
-                        aria-label={t("eggs.cages.editAria")}
-                        className={cn(
-                          buttonVariants({ variant: "ghost", size: "icon-lg" }),
-                          "text-muted-foreground",
-                        )}
-                      >
-                        <Pencil />
-                      </Link>
+                      <div className="flex justify-end gap-1">
+                        <Link
+                          href={`/eggs/cages/${cage.id}/edit`}
+                          aria-label={t("eggs.cages.editAria")}
+                          className={cn(
+                            buttonVariants({ variant: "ghost", size: "icon-lg" }),
+                            "text-muted-foreground",
+                          )}
+                        >
+                          <Pencil />
+                        </Link>
+                        <DeleteButton
+                          action={deactivateCageAction.bind(null, cage.id)}
+                          confirmMessage={t("common.confirmDelete")}
+                          label={t("eggs.cages.deactivateAria")}
+                        />
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

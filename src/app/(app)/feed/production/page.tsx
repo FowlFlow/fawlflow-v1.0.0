@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Pencil } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -11,7 +12,9 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { SectionNav } from "@/components/section-nav";
+import { DeleteButton } from "@/components/delete-button";
 import { getT } from "@/lib/i18n/server";
+import { deleteProductionBatchAction } from "./actions";
 
 export default async function ProductionPage() {
   const { t } = await getT();
@@ -60,9 +63,26 @@ export default async function ProductionPage() {
                 <div key={batch.id} className="rounded-lg border p-4">
                   <div className="flex items-start justify-between gap-2">
                     <p className="font-medium">{batch.feedType.nameEn}</p>
-                    <p className="shrink-0 text-sm text-muted-foreground">
-                      {batch.date.toLocaleDateString()}
-                    </p>
+                    <div className="flex shrink-0 items-center gap-1">
+                      <p className="text-sm text-muted-foreground">
+                        {batch.date.toLocaleDateString()}
+                      </p>
+                      <Link
+                        href={`/feed/production/${batch.id}/edit`}
+                        aria-label={t("feed.production.editAria")}
+                        className={cn(
+                          buttonVariants({ variant: "ghost", size: "icon-lg" }),
+                          "text-muted-foreground",
+                        )}
+                      >
+                        <Pencil />
+                      </Link>
+                      <DeleteButton
+                        action={deleteProductionBatchAction.bind(null, batch.id)}
+                        confirmMessage={t("common.confirmDelete")}
+                        label={t("feed.production.deleteAria")}
+                      />
+                    </div>
                   </div>
                   <div className="mt-1 flex items-center justify-between text-sm">
                     <span>
@@ -99,6 +119,7 @@ export default async function ProductionPage() {
                   <TableHead>{t("feed.production.producedHeader")}</TableHead>
                   <TableHead>{t("feed.reports.navLabel")}</TableHead>
                   <TableHead>{t("feed.production.materialsUsedHeader")}</TableHead>
+                  <TableHead className="text-right">{t("common.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -130,6 +151,25 @@ export default async function ProductionPage() {
                               `${c.quantityKg.toNumber().toFixed(2)}kg ${c.material.nameEn}`,
                           )
                           .join(", ")}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1">
+                          <Link
+                            href={`/feed/production/${batch.id}/edit`}
+                            aria-label={t("feed.production.editAria")}
+                            className={cn(
+                              buttonVariants({ variant: "ghost", size: "icon-lg" }),
+                              "text-muted-foreground",
+                            )}
+                          >
+                            <Pencil />
+                          </Link>
+                          <DeleteButton
+                            action={deleteProductionBatchAction.bind(null, batch.id)}
+                            confirmMessage={t("common.confirmDelete")}
+                            label={t("feed.production.deleteAria")}
+                          />
+                        </div>
                       </TableCell>
                     </TableRow>
                   );

@@ -12,7 +12,9 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { SectionNav } from "@/components/section-nav";
+import { DeleteButton } from "@/components/delete-button";
 import { getT } from "@/lib/i18n/server";
+import { deactivateBoxTypeAction } from "./actions";
 
 export default async function BoxTypesPage() {
   const { t } = await getT();
@@ -57,16 +59,23 @@ export default async function BoxTypesPage() {
                     })}
                   </p>
                 </div>
-                <Link
-                  href={`/eggs/box-types/${boxType.id}/edit`}
-                  aria-label={t("eggs.boxTypes.editAria")}
-                  className={cn(
-                    buttonVariants({ variant: "ghost", size: "icon-lg" }),
-                    "text-muted-foreground",
-                  )}
-                >
-                  <Pencil />
-                </Link>
+                <div className="flex shrink-0 items-center gap-1">
+                  <Link
+                    href={`/eggs/box-types/${boxType.id}/edit`}
+                    aria-label={t("eggs.boxTypes.editAria")}
+                    className={cn(
+                      buttonVariants({ variant: "ghost", size: "icon-lg" }),
+                      "text-muted-foreground",
+                    )}
+                  >
+                    <Pencil />
+                  </Link>
+                  <DeleteButton
+                    action={deactivateBoxTypeAction.bind(null, boxType.id)}
+                    confirmMessage={t("common.confirmDelete")}
+                    label={t("eggs.boxTypes.deactivateAria")}
+                  />
+                </div>
               </div>
             ))}
           </div>
@@ -87,16 +96,23 @@ export default async function BoxTypesPage() {
                     <TableCell className="font-medium">{boxType.name}</TableCell>
                     <TableCell>{boxType.eggsPerBox}</TableCell>
                     <TableCell>
-                      <Link
-                        href={`/eggs/box-types/${boxType.id}/edit`}
-                        aria-label={t("eggs.boxTypes.editAria")}
-                        className={cn(
-                          buttonVariants({ variant: "ghost", size: "icon-lg" }),
-                          "text-muted-foreground",
-                        )}
-                      >
-                        <Pencil />
-                      </Link>
+                      <div className="flex justify-end gap-1">
+                        <Link
+                          href={`/eggs/box-types/${boxType.id}/edit`}
+                          aria-label={t("eggs.boxTypes.editAria")}
+                          className={cn(
+                            buttonVariants({ variant: "ghost", size: "icon-lg" }),
+                            "text-muted-foreground",
+                          )}
+                        >
+                          <Pencil />
+                        </Link>
+                        <DeleteButton
+                          action={deactivateBoxTypeAction.bind(null, boxType.id)}
+                          confirmMessage={t("common.confirmDelete")}
+                          label={t("eggs.boxTypes.deactivateAria")}
+                        />
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

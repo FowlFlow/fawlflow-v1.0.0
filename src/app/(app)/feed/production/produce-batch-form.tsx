@@ -9,17 +9,29 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { NativeSelect } from "@/components/ui/native-select";
 import { useActionToast } from "@/hooks/use-action-toast";
 import { useTranslations } from "@/lib/i18n/client";
-import { produceBatchAction, type ProduceBatchState } from "./actions";
+import {
+  produceBatchAction,
+  updateProductionBatchAction,
+  type ProduceBatchState,
+} from "./actions";
 
 const initialState: ProduceBatchState = {};
 
 export function ProduceBatchForm({
   feedTypes,
+  batch,
 }: {
   feedTypes: { id: string; nameEn: string; batchSizeKg: string }[];
+  batch?: {
+    id: string;
+    feedTypeId: string;
+    date: string;
+    quantityProducedKg: string;
+    notes?: string;
+  };
 }) {
   const [state, formAction, pending] = useActionState(
-    produceBatchAction,
+    batch ? updateProductionBatchAction : produceBatchAction,
     initialState,
   );
   useActionToast(state?.error);
@@ -29,6 +41,7 @@ export function ProduceBatchForm({
   if (state?.needsConfirmation && state.formValues) {
     return (
       <form action={formAction} className="max-w-lg space-y-4">
+        {batch && <input type="hidden" name="id" value={batch.id} />}
         <input type="hidden" name="feedTypeId" value={state.formValues.feedTypeId} />
         <input type="hidden" name="date" value={state.formValues.date} />
         <input
@@ -71,6 +84,7 @@ export function ProduceBatchForm({
 
   return (
     <form action={formAction} className="max-w-lg space-y-5">
+      {batch && <input type="hidden" name="id" value={batch.id} />}
       <div className="space-y-2">
         <Label htmlFor="feedTypeId">{t("feed.common.feedType")}</Label>
         {feedTypes.length === 0 ? (
@@ -78,10 +92,17 @@ export function ProduceBatchForm({
             {t("feed.production.noRecipes")}
           </p>
         ) : (
-          <NativeSelect id="feedTypeId" name="feedTypeId" required defaultValue="">
-            <option value="" disabled>
-              {t("common.select", { item: t("feed.common.feedType") })}
-            </option>
+          <NativeSelect
+            id="feedTypeId"
+            name="feedTypeId"
+            required
+            defaultValue={batch?.feedTypeId ?? ""}
+          >
+            {!batch && (
+              <option value="" disabled>
+                {t("common.select", { item: t("feed.common.feedType") })}
+              </option>
+            )}
             {feedTypes.map((feedType) => (
               <option key={feedType.id} value={feedType.id}>
                 {t("feed.production.feedTypeOption", {
@@ -96,7 +117,13 @@ export function ProduceBatchForm({
 
       <div className="space-y-2">
         <Label htmlFor="date">{t("common.date")}</Label>
-        <Input id="date" name="date" type="date" required defaultValue={today} />
+        <Input
+          id="date"
+          name="date"
+          type="date"
+          required
+          defaultValue={batch?.date ?? today}
+        />
       </div>
 
       <div className="space-y-2">
@@ -111,12 +138,13 @@ export function ProduceBatchForm({
           min="0"
           inputMode="decimal"
           required
+          defaultValue={batch?.quantityProducedKg}
         />
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="notes">{t("common.notes")}</Label>
-        <Input id="notes" name="notes" />
+        <Input id="notes" name="notes" defaultValue={batch?.notes} />
       </div>
 
       {state?.error && (
@@ -127,7 +155,11 @@ export function ProduceBatchForm({
 
       <Button type="submit" disabled={pending || feedTypes.length === 0}>
         {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-        {pending ? t("feed.production.producing") : t("feed.production.produceBatch")}
+        {pending
+          ? t("feed.production.producing")
+          : batch
+            ? t("feed.production.saveBatch")
+            : t("feed.production.produceBatch")}
       </Button>
     </form>
   );

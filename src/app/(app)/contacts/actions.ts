@@ -52,3 +52,15 @@ export async function saveContactAction(
     `/contacts?flash=${encodeURIComponent(id ? t("contacts.flash.updated") : t("contacts.flash.added"))}`,
   );
 }
+
+export async function deactivateContactAction(id: string): Promise<void> {
+  const contact = await prisma.contact.findUnique({ where: { id } });
+  if (!contact || !contact.isActive) return;
+
+  await prisma.contact.update({
+    where: { id },
+    data: { isActive: false },
+  });
+
+  revalidatePath("/contacts");
+}

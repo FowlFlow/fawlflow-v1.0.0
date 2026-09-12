@@ -258,7 +258,6 @@ model EggCollection {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  @@unique([cageId, turnId, date])
   @@index([cageId, date])
   @@index([turnId])
   @@index([date])

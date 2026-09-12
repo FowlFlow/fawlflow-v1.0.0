@@ -53,3 +53,16 @@ export async function saveTurnAction(
     `/settings/egg-turns?flash=${encodeURIComponent(id ? t("settings.eggTurns.flash.updated") : t("settings.eggTurns.flash.added"))}`,
   );
 }
+
+export async function deactivateEggTurnAction(id: string): Promise<void> {
+  const turn = await prisma.eggTurn.findUnique({ where: { id } });
+  if (!turn || !turn.isActive) return;
+
+  await prisma.eggTurn.update({
+    where: { id },
+    data: { isActive: false },
+  });
+
+  revalidatePath("/settings/egg-turns");
+  revalidatePath("/eggs/log");
+}

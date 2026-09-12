@@ -77,3 +77,67 @@ export async function logFeedUsageAction(
   revalidatePath("/feed/usage");
   redirect(`/feed/usage?flash=${encodeURIComponent(t("feed.usage.logged"))}`);
 }
+
+// Edits skip the shortage-confirmation dance that new entries go through —
+// that warning only matters when a NEW entry would push stock negative; for
+// an existing entry we just validate and save the change in place.
+export async function updateFeedUsageAction(
+  _prevState: UsageFormState,
+  formData: FormData,
+): Promise<UsageFormState> {
+  const { t } = await getT();
+
+  const updateUsageSchema = z.object({
+    id: z.string().min(1),
+    feedTypeId: z.string().min(1, t("feed.usage.selectFeedType")),
+    date: z.string().min(1, t("feed.common.dateRequired")),
+    quantityKg: z.coerce.number().positive(t("feed.common.quantityPositive")),
+    notes: z.string().trim().max(300).optional(),
+  });
+
+  const parsed = updateUsageSchema.safeParse({
+    id: formData.get("id"),
+    feedTypeId: formData.get("feedTypeId"),
+    date: formData.get("date"),
+    quantityKg: formData.get("quantityKg"),
+    notes: formData.get("notes") || undefined,
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? t("feed.common.checkForm") };
+  }
+
+  const { id, feedTypeId, date, quantityKg, notes } = parsed.data;
+
+  const existingUsage = await prisma.feedUsage.findUnique({ where: { id } });
+  if (!existingUsage || existingUsage.deletedAt) {
+    return { error: t("feed.usage.notFound") };
+  }
+
+  const feedType = await prisma.feedType.findUnique({ where: { id: feedTypeId } });
+  if (!feedType) return { error: t("feed.common.feedTypeNotFound") };
+
+  await prisma.feedUsage.update({
+    where: { id },
+    data: { feedTypeId, date: new Date(date), quantityKg, notes },
+  });
+
+  revalidatePath("/feed/materials");
+  revalidatePath("/feed/types");
+  revalidatePath("/feed/usage");
+  redirect(`/feed/usage?flash=${encodeURIComponent(t("feed.usage.updated"))}`);
+}
+
+export async function deleteFeedUsageAction(id: string): Promise<void> {
+  const usage = await prisma.feedUsage.findUnique({ where: { id } });
+  if (!usage || usage.deletedAt) return;
+
+  await prisma.feedUsage.update({
+    where: { id },
+    data: { deletedAt: new Date() },
+  });
+
+  revalidatePath("/feed/materials");
+  revalidatePath("/feed/types");
+  revalidatePath("/feed/usage");
+}

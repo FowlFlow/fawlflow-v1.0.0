@@ -8,18 +8,30 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { NativeSelect } from "@/components/ui/native-select";
 import { useActionToast } from "@/hooks/use-action-toast";
-import { logFeedUsageAction, type UsageFormState } from "./actions";
+import {
+  logFeedUsageAction,
+  updateFeedUsageAction,
+  type UsageFormState,
+} from "./actions";
 import { useTranslations } from "@/lib/i18n/client";
 
 const initialState: UsageFormState = {};
 
 export function UsageForm({
   feedTypes,
+  usage,
 }: {
   feedTypes: { id: string; nameEn: string }[];
+  usage?: {
+    id: string;
+    feedTypeId: string;
+    date: string;
+    quantityKg: string;
+    notes?: string;
+  };
 }) {
   const [state, formAction, pending] = useActionState(
-    logFeedUsageAction,
+    usage ? updateFeedUsageAction : logFeedUsageAction,
     initialState,
   );
   useActionToast(state?.error);
@@ -29,6 +41,7 @@ export function UsageForm({
   if (state?.needsConfirmation && state.formValues) {
     return (
       <form action={formAction} className="max-w-lg space-y-4">
+        {usage && <input type="hidden" name="id" value={usage.id} />}
         <input type="hidden" name="feedTypeId" value={state.formValues.feedTypeId} />
         <input type="hidden" name="date" value={state.formValues.date} />
         <input
@@ -64,6 +77,7 @@ export function UsageForm({
 
   return (
     <form action={formAction} className="max-w-lg space-y-5">
+      {usage && <input type="hidden" name="id" value={usage.id} />}
       <div className="space-y-2">
         <Label htmlFor="feedTypeId">{t("feed.common.feedType")}</Label>
         {feedTypes.length === 0 ? (
@@ -71,10 +85,17 @@ export function UsageForm({
             {t("feed.production.noRecipes")}
           </p>
         ) : (
-          <NativeSelect id="feedTypeId" name="feedTypeId" required defaultValue="">
-            <option value="" disabled>
-              {t("feed.usage.selectFeedType")}
-            </option>
+          <NativeSelect
+            id="feedTypeId"
+            name="feedTypeId"
+            required
+            defaultValue={usage?.feedTypeId ?? ""}
+          >
+            {!usage && (
+              <option value="" disabled>
+                {t("feed.usage.selectFeedType")}
+              </option>
+            )}
             {feedTypes.map((feedType) => (
               <option key={feedType.id} value={feedType.id}>
                 {feedType.nameEn}
@@ -86,7 +107,13 @@ export function UsageForm({
 
       <div className="space-y-2">
         <Label htmlFor="date">{t("common.date")}</Label>
-        <Input id="date" name="date" type="date" required defaultValue={today} />
+        <Input
+          id="date"
+          name="date"
+          type="date"
+          required
+          defaultValue={usage?.date ?? today}
+        />
       </div>
 
       <div className="space-y-2">
@@ -99,12 +126,18 @@ export function UsageForm({
           min="0"
           inputMode="decimal"
           required
+          defaultValue={usage?.quantityKg}
         />
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="notes">{t("common.notes")}</Label>
-        <Input id="notes" name="notes" placeholder={t("feed.usage.notesPlaceholder")} />
+        <Input
+          id="notes"
+          name="notes"
+          placeholder={t("feed.usage.notesPlaceholder")}
+          defaultValue={usage?.notes}
+        />
       </div>
 
       {state?.error && (
@@ -115,7 +148,11 @@ export function UsageForm({
 
       <Button type="submit" disabled={pending || feedTypes.length === 0}>
         {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-        {pending ? t("feed.usage.logging") : t("feed.usage.logNew")}
+        {pending
+          ? t("feed.usage.logging")
+          : usage
+            ? t("feed.usage.saveUsage")
+            : t("feed.usage.logNew")}
       </Button>
     </form>
   );

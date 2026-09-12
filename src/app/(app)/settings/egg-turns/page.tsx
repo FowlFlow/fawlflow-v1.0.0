@@ -3,8 +3,10 @@ import { Pencil } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { buttonVariants } from "@/components/ui/button";
 import { SectionNav } from "@/components/section-nav";
+import { DeleteButton } from "@/components/delete-button";
 import { cn } from "@/lib/utils";
 import { getT } from "@/lib/i18n/server";
+import { deactivateEggTurnAction } from "./actions";
 
 export default async function EggTurnsPage() {
   const { t } = await getT();
@@ -45,16 +47,23 @@ export default async function EggTurnsPage() {
                   {t("settings.eggTurns.orderDisplay", { order: turn.sortOrder })}
                 </p>
               </div>
-              <Link
-                href={`/settings/egg-turns/${turn.id}/edit`}
-                aria-label={t("settings.eggTurns.editTitle")}
-                className={cn(
-                  buttonVariants({ variant: "ghost", size: "icon-lg" }),
-                  "text-muted-foreground",
-                )}
-              >
-                <Pencil />
-              </Link>
+              <div className="flex shrink-0 items-center gap-1">
+                <Link
+                  href={`/settings/egg-turns/${turn.id}/edit`}
+                  aria-label={t("settings.eggTurns.editTitle")}
+                  className={cn(
+                    buttonVariants({ variant: "ghost", size: "icon-lg" }),
+                    "text-muted-foreground",
+                  )}
+                >
+                  <Pencil />
+                </Link>
+                <DeleteButton
+                  action={deactivateEggTurnAction.bind(null, turn.id)}
+                  confirmMessage={t("common.confirmDelete")}
+                  label={t("settings.eggTurns.deactivateAria")}
+                />
+              </div>
             </div>
           ))}
         </div>

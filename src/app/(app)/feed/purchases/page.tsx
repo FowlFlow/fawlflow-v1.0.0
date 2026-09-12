@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Pencil } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -11,7 +12,9 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { SectionNav } from "@/components/section-nav";
+import { DeleteButton } from "@/components/delete-button";
 import { getT } from "@/lib/i18n/server";
+import { deletePurchaseAction } from "./actions";
 
 export default async function PurchasesPage() {
   const { t } = await getT();
@@ -49,9 +52,26 @@ export default async function PurchasesPage() {
               <div key={purchase.id} className="rounded-lg border p-4">
                 <div className="flex items-start justify-between gap-2">
                   <p className="font-medium">{purchase.material.nameEn}</p>
-                  <p className="shrink-0 text-sm text-muted-foreground">
-                    {purchase.date.toLocaleDateString()}
-                  </p>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <p className="text-sm text-muted-foreground">
+                      {purchase.date.toLocaleDateString()}
+                    </p>
+                    <Link
+                      href={`/feed/purchases/${purchase.id}/edit`}
+                      aria-label={t("feed.purchases.editAria")}
+                      className={cn(
+                        buttonVariants({ variant: "ghost", size: "icon-lg" }),
+                        "text-muted-foreground",
+                      )}
+                    >
+                      <Pencil />
+                    </Link>
+                    <DeleteButton
+                      action={deletePurchaseAction.bind(null, purchase.id)}
+                      confirmMessage={t("common.confirmDelete")}
+                      label={t("feed.purchases.deleteAria")}
+                    />
+                  </div>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {t("feed.purchases.fromSupplier", { name: purchase.supplier.name })}
@@ -79,6 +99,7 @@ export default async function PurchasesPage() {
                   <TableHead>{t("common.supplier")}</TableHead>
                   <TableHead>{t("common.quantity")}</TableHead>
                   <TableHead>{t("feed.purchases.totalCostHeader")}</TableHead>
+                  <TableHead className="text-right">{t("common.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -94,6 +115,25 @@ export default async function PurchasesPage() {
                       {purchase.enteredUnit === "TON" ? "Ton" : "kg"}
                     </TableCell>
                     <TableCell>Rs. {purchase.totalCost.toString()}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-1">
+                        <Link
+                          href={`/feed/purchases/${purchase.id}/edit`}
+                          aria-label={t("feed.purchases.editAria")}
+                          className={cn(
+                            buttonVariants({ variant: "ghost", size: "icon-lg" }),
+                            "text-muted-foreground",
+                          )}
+                        >
+                          <Pencil />
+                        </Link>
+                        <DeleteButton
+                          action={deletePurchaseAction.bind(null, purchase.id)}
+                          confirmMessage={t("common.confirmDelete")}
+                          label={t("feed.purchases.deleteAria")}
+                        />
+                      </div>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

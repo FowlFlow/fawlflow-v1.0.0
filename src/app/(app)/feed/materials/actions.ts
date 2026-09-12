@@ -52,3 +52,15 @@ export async function saveMaterialAction(
     `/feed/materials?flash=${encodeURIComponent(id ? t("feed.materials.updated") : t("feed.materials.added"))}`,
   );
 }
+
+export async function deactivateMaterialAction(id: string): Promise<void> {
+  const material = await prisma.rawMaterial.findUnique({ where: { id } });
+  if (!material || !material.isActive) return;
+
+  await prisma.rawMaterial.update({
+    where: { id },
+    data: { isActive: false },
+  });
+
+  revalidatePath("/feed/materials");
+}

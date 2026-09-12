@@ -150,3 +150,15 @@ export async function saveFeedTypeAction(
     `/feed/types?flash=${encodeURIComponent(id ? t("feed.types.updated") : t("feed.types.added"))}`,
   );
 }
+
+export async function deactivateFeedTypeAction(id: string): Promise<void> {
+  const feedType = await prisma.feedType.findUnique({ where: { id } });
+  if (!feedType || !feedType.isActive) return;
+
+  await prisma.feedType.update({
+    where: { id },
+    data: { isActive: false },
+  });
+
+  revalidatePath("/feed/types");
+}

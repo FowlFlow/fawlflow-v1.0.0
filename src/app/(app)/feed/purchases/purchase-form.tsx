@@ -10,19 +10,34 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { NativeSelect } from "@/components/ui/native-select";
 import { useActionToast } from "@/hooks/use-action-toast";
 import { useTranslations } from "@/lib/i18n/client";
-import { recordPurchaseAction, type PurchaseFormState } from "./actions";
+import {
+  recordPurchaseAction,
+  updatePurchaseAction,
+  type PurchaseFormState,
+} from "./actions";
 
 const initialState: PurchaseFormState = {};
 
 export function PurchaseForm({
   materials,
   suppliers,
+  purchase,
 }: {
   materials: { id: string; nameEn: string }[];
   suppliers: { id: string; name: string }[];
+  purchase?: {
+    id: string;
+    materialId: string;
+    supplierId: string;
+    date: string;
+    enteredUnit: "KG" | "TON";
+    enteredQuantity: string;
+    totalCost: string;
+    notes?: string;
+  };
 }) {
   const [state, formAction, pending] = useActionState(
-    recordPurchaseAction,
+    purchase ? updatePurchaseAction : recordPurchaseAction,
     initialState,
   );
   useActionToast(state?.error);
@@ -32,6 +47,7 @@ export function PurchaseForm({
 
   return (
     <form action={formAction} className="max-w-md space-y-5">
+      {purchase && <input type="hidden" name="id" value={purchase.id} />}
       <div className="space-y-2">
         <Label htmlFor="materialId">{t("common.material")}</Label>
         {materials.length === 0 ? (
@@ -43,10 +59,17 @@ export function PurchaseForm({
             .
           </p>
         ) : (
-          <NativeSelect id="materialId" name="materialId" required defaultValue="">
-            <option value="" disabled>
-              {t("common.select", { item: t("common.material") })}
-            </option>
+          <NativeSelect
+            id="materialId"
+            name="materialId"
+            required
+            defaultValue={purchase?.materialId ?? ""}
+          >
+            {!purchase && (
+              <option value="" disabled>
+                {t("common.select", { item: t("common.material") })}
+              </option>
+            )}
             {materials.map((material) => (
               <option key={material.id} value={material.id}>
                 {material.nameEn}
@@ -67,10 +90,17 @@ export function PurchaseForm({
             .
           </p>
         ) : (
-          <NativeSelect id="supplierId" name="supplierId" required defaultValue="">
-            <option value="" disabled>
-              {t("common.select", { item: t("common.supplier") })}
-            </option>
+          <NativeSelect
+            id="supplierId"
+            name="supplierId"
+            required
+            defaultValue={purchase?.supplierId ?? ""}
+          >
+            {!purchase && (
+              <option value="" disabled>
+                {t("common.select", { item: t("common.supplier") })}
+              </option>
+            )}
             {suppliers.map((supplier) => (
               <option key={supplier.id} value={supplier.id}>
                 {supplier.name}
@@ -82,7 +112,13 @@ export function PurchaseForm({
 
       <div className="space-y-2">
         <Label htmlFor="date">{t("common.date")}</Label>
-        <Input id="date" name="date" type="date" required defaultValue={today} />
+        <Input
+          id="date"
+          name="date"
+          type="date"
+          required
+          defaultValue={purchase?.date ?? today}
+        />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -96,11 +132,16 @@ export function PurchaseForm({
             min="0"
             inputMode="decimal"
             required
+            defaultValue={purchase?.enteredQuantity}
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="enteredUnit">{t("feed.materials.unitLabel")}</Label>
-          <NativeSelect id="enteredUnit" name="enteredUnit" defaultValue="KG">
+          <NativeSelect
+            id="enteredUnit"
+            name="enteredUnit"
+            defaultValue={purchase?.enteredUnit ?? "KG"}
+          >
             <option value="KG">KG</option>
             <option value="TON">Ton</option>
           </NativeSelect>
@@ -117,12 +158,13 @@ export function PurchaseForm({
           min="0"
           inputMode="decimal"
           required
+          defaultValue={purchase?.totalCost}
         />
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="notes">{t("common.notes")}</Label>
-        <Input id="notes" name="notes" />
+        <Input id="notes" name="notes" defaultValue={purchase?.notes} />
       </div>
 
       {state?.error && (
@@ -133,7 +175,11 @@ export function PurchaseForm({
 
       <Button type="submit" disabled={pending || !canSubmit}>
         {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-        {pending ? t("common.saving") : t("feed.purchases.recordPurchase")}
+        {pending
+          ? t("common.saving")
+          : purchase
+            ? t("feed.purchases.savePurchase")
+            : t("feed.purchases.recordPurchase")}
       </Button>
     </form>
   );

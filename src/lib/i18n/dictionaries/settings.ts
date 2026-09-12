@@ -11,6 +11,7 @@ export const settingsEn: Dict = {
     editTitle: "Edit Egg Turn",
     addTitle: "Add Egg Turn",
     addNew: "Add Turn",
+    deactivateAria: "Deactivate turn",
     empty: "No egg turns yet.",
     manage: "Manage Egg Turns",
     description:
@@ -69,6 +70,7 @@ export const settingsSi: Dict = {
     editTitle: "බිත්තර වාරය Edit කරන්න",
     addTitle: "බිත්තර වාරයක් Add කරන්න",
     addNew: "වාරයක් Add කරන්න",
+    deactivateAria: "වාරය අක්‍රිය කරන්න",
     empty: "තවම බිත්තර වාර නැත.",
     manage: "බිත්තර වාර කළමනාකරණය කරන්න",
     description:

@@ -47,6 +47,8 @@ export const commonEn: Dict = {
   material: "Material",
   proceedAnyway: "Proceed Anyway",
   somethingWrong: "Something went wrong. Please try again.",
+  confirmDelete: "Delete this entry? This can't be undone.",
+  notFound: "Entry not found.",
 } as const;
 
 export const commonSi: Dict = {
@@ -92,4 +94,6 @@ export const commonSi: Dict = {
   material: "අමුද්‍රව්‍ය",
   proceedAnyway: "එසේ වුවත් ඉදිරියට යන්න",
   somethingWrong: "යමක් වැරදී ඇත. නැවත උත්සාහ කරන්න.",
+  confirmDelete: "මෙම සටහන Delete කරන්නද? මෙය නැවත පෙරළිය නොහැක.",
+  notFound: "සටහන හමු නොවීය.",
 } as const;

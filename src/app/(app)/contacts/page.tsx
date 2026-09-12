@@ -12,7 +12,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { DeleteButton } from "@/components/delete-button";
 import { getT } from "@/lib/i18n/server";
+import { deactivateContactAction } from "./actions";
 
 export default async function ContactsPage() {
   const { t } = await getT();
@@ -40,16 +42,23 @@ export default async function ContactsPage() {
               <div key={contact.id} className="rounded-lg border p-4">
                 <div className="flex items-start justify-between gap-2">
                   <p className="font-medium">{contact.name}</p>
-                  <Link
-                    href={`/contacts/${contact.id}/edit`}
-                    aria-label={t("contacts.editTitle")}
-                    className={cn(
-                      buttonVariants({ variant: "ghost", size: "icon-lg" }),
-                      "shrink-0 text-muted-foreground",
-                    )}
-                  >
-                    <Pencil />
-                  </Link>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <Link
+                      href={`/contacts/${contact.id}/edit`}
+                      aria-label={t("contacts.editTitle")}
+                      className={cn(
+                        buttonVariants({ variant: "ghost", size: "icon-lg" }),
+                        "text-muted-foreground",
+                      )}
+                    >
+                      <Pencil />
+                    </Link>
+                    <DeleteButton
+                      action={deactivateContactAction.bind(null, contact.id)}
+                      confirmMessage={t("common.confirmDelete")}
+                      label={t("contacts.deactivateAria")}
+                    />
+                  </div>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {contact.phone ?? t("contacts.noPhone")}
@@ -94,16 +103,23 @@ export default async function ContactsPage() {
                       )}
                     </TableCell>
                     <TableCell>
-                      <Link
-                        href={`/contacts/${contact.id}/edit`}
-                        aria-label={t("contacts.editTitle")}
-                        className={cn(
-                          buttonVariants({ variant: "ghost", size: "icon-lg" }),
-                          "text-muted-foreground",
-                        )}
-                      >
-                        <Pencil />
-                      </Link>
+                      <div className="flex justify-end gap-1">
+                        <Link
+                          href={`/contacts/${contact.id}/edit`}
+                          aria-label={t("contacts.editTitle")}
+                          className={cn(
+                            buttonVariants({ variant: "ghost", size: "icon-lg" }),
+                            "text-muted-foreground",
+                          )}
+                        >
+                          <Pencil />
+                        </Link>
+                        <DeleteButton
+                          action={deactivateContactAction.bind(null, contact.id)}
+                          confirmMessage={t("common.confirmDelete")}
+                          label={t("contacts.deactivateAria")}
+                        />
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

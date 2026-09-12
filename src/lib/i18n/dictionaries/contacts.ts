@@ -8,6 +8,7 @@ import type { Dict } from "../types";
 export const contactsEn: Dict = {
   title: "Contacts",
   editTitle: "Edit Contact",
+  deactivateAria: "Deactivate contact",
   addNew: "Add Contact",
   empty: "No contacts yet. Add buyers and suppliers here.",
   noPhone: "No phone number",
@@ -30,6 +31,7 @@ export const contactsEn: Dict = {
 export const contactsSi: Dict = {
   title: "සම්බන්ධතා",
   editTitle: "සම්බන්ධතාව Edit කරන්න",
+  deactivateAria: "සම්බන්ධතාව අක්‍රිය කරන්න",
   addNew: "සම්බන්ධතාවයක් Add කරන්න",
   empty: "තවම සම්බන්ධතා නැත. ගැණුම්කරුවන් සහ සැපයුම්කරුවන් මෙහි Add කරන්න.",
   noPhone: "දුරකථන අංකයක් නැත",

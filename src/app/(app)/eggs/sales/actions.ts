@@ -137,3 +137,106 @@ export async function recordEggSaleAction(
   revalidatePath("/eggs/sales");
   redirect(`/eggs/sales?flash=${encodeURIComponent(t("eggs.sales.recorded"))}`);
 }
+
+function updateEggSaleSchema(t: Translate) {
+  return z.object({
+    id: z.string().min(1),
+    buyerId: z.string().min(1, t("eggs.sales.selectBuyer")),
+    date: z.string().min(1, `${t("common.date")} ${t("common.required")}`),
+    boxTypeId: z.string().optional(),
+    boxCount: z.coerce.number().int().min(0),
+    looseEggCount: z.coerce.number().int().min(0),
+    ratePerEgg: z.coerce.number().min(0),
+    notes: z.string().trim().max(300).optional(),
+  });
+}
+
+export async function updateEggSaleAction(
+  _prevState: EggSaleFormState,
+  formData: FormData,
+): Promise<EggSaleFormState> {
+  const { t } = await getT();
+  const parsed = updateEggSaleSchema(t).safeParse({
+    id: formData.get("id"),
+    buyerId: formData.get("buyerId"),
+    date: formData.get("date"),
+    boxTypeId: formData.get("boxTypeId") || undefined,
+    boxCount: formData.get("boxCount") || 0,
+    looseEggCount: formData.get("looseEggCount") || 0,
+    ratePerEgg: formData.get("ratePerEgg"),
+    notes: formData.get("notes") || undefined,
+  });
+
+  if (!parsed.success) {
+    return {
+      error: parsed.error.issues[0]?.message ?? t("eggs.validation.checkForm"),
+    };
+  }
+
+  const { id, buyerId, date, boxTypeId, boxCount, looseEggCount, ratePerEgg, notes } =
+    parsed.data;
+
+  if (boxCount === 0 && looseEggCount === 0) {
+    return { error: t("eggs.sales.enterBoxesOrLoose") };
+  }
+  if (boxCount > 0 && !boxTypeId) {
+    return { error: t("eggs.sales.selectBoxTypeOrZero") };
+  }
+
+  const existing = await prisma.eggSale.findUnique({ where: { id } });
+  if (!existing || existing.deletedAt) {
+    return { error: t("eggs.sales.notFound") };
+  }
+
+  const buyer = await prisma.contact.findUnique({ where: { id: buyerId } });
+  if (!buyer) return { error: t("eggs.sales.buyerNotFound") };
+
+  let eggsPerBoxAtSale: number | null = null;
+  if (boxTypeId) {
+    const boxType = await prisma.eggBoxType.findUnique({ where: { id: boxTypeId } });
+    if (!boxType) return { error: t("eggs.sales.boxTypeNotFound") };
+    eggsPerBoxAtSale = boxType.eggsPerBox;
+  }
+
+  const totalEggCount = boxCount * (eggsPerBoxAtSale ?? 0) + looseEggCount;
+  const totalAmount = totalEggCount * ratePerEgg;
+
+  await prisma.$transaction(async (tx) => {
+    await tx.eggSale.update({
+      where: { id },
+      data: {
+        buyerId,
+        date: new Date(date),
+        boxTypeId: boxTypeId ?? null,
+        boxCount,
+        eggsPerBoxAtSale,
+        looseEggCount,
+        totalEggCount,
+        ratePerEgg,
+        totalAmount,
+        notes,
+      },
+    });
+
+    if (!buyer.isBuyer) {
+      await tx.contact.update({ where: { id: buyerId }, data: { isBuyer: true } });
+    }
+  });
+
+  revalidatePath("/eggs/reports");
+  revalidatePath("/eggs/sales");
+  redirect(`/eggs/sales?flash=${encodeURIComponent(t("eggs.sales.updated"))}`);
+}
+
+export async function deleteEggSaleAction(id: string): Promise<void> {
+  const sale = await prisma.eggSale.findUnique({ where: { id } });
+  if (!sale || sale.deletedAt) return;
+
+  await prisma.eggSale.update({
+    where: { id },
+    data: { deletedAt: new Date() },
+  });
+
+  revalidatePath("/eggs/reports");
+  revalidatePath("/eggs/sales");
+}

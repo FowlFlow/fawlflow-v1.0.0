@@ -61,3 +61,15 @@ export async function saveCageAction(
     `/eggs/cages?flash=${encodeURIComponent(id ? t("eggs.cages.updated") : t("eggs.cages.added"))}`,
   );
 }
+
+export async function deactivateCageAction(id: string): Promise<void> {
+  const cage = await prisma.cage.findUnique({ where: { id } });
+  if (!cage || !cage.isActive) return;
+
+  await prisma.cage.update({
+    where: { id },
+    data: { isActive: false },
+  });
+
+  revalidatePath("/eggs/cages");
+}

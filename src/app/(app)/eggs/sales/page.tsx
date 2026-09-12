@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Pencil } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -11,7 +12,9 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { SectionNav } from "@/components/section-nav";
+import { DeleteButton } from "@/components/delete-button";
 import { getT } from "@/lib/i18n/server";
+import { deleteEggSaleAction } from "./actions";
 
 export default async function EggSalesPage() {
   const { t } = await getT();
@@ -49,9 +52,26 @@ export default async function EggSalesPage() {
               <div key={sale.id} className="rounded-lg border p-4">
                 <div className="flex items-start justify-between gap-2">
                   <p className="font-medium">{sale.buyer.name}</p>
-                  <p className="shrink-0 text-sm text-muted-foreground">
-                    {sale.date.toLocaleDateString()}
-                  </p>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <p className="text-sm text-muted-foreground">
+                      {sale.date.toLocaleDateString()}
+                    </p>
+                    <Link
+                      href={`/eggs/sales/${sale.id}/edit`}
+                      aria-label={t("eggs.sales.editAria")}
+                      className={cn(
+                        buttonVariants({ variant: "ghost", size: "icon-lg" }),
+                        "text-muted-foreground",
+                      )}
+                    >
+                      <Pencil />
+                    </Link>
+                    <DeleteButton
+                      action={deleteEggSaleAction.bind(null, sale.id)}
+                      confirmMessage={t("common.confirmDelete")}
+                      label={t("eggs.sales.deleteAria")}
+                    />
+                  </div>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {sale.boxCount > 0 &&
@@ -86,6 +106,7 @@ export default async function EggSalesPage() {
                   <TableHead>{t("eggs.sales.colLoose")}</TableHead>
                   <TableHead>{t("eggs.sales.colTotalEggs")}</TableHead>
                   <TableHead>{t("common.total")}</TableHead>
+                  <TableHead className="text-right">{t("common.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -108,6 +129,25 @@ export default async function EggSalesPage() {
                     </TableCell>
                     <TableCell>{sale.totalEggCount}</TableCell>
                     <TableCell>Rs. {sale.totalAmount.toString()}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-1">
+                        <Link
+                          href={`/eggs/sales/${sale.id}/edit`}
+                          aria-label={t("eggs.sales.editAria")}
+                          className={cn(
+                            buttonVariants({ variant: "ghost", size: "icon-lg" }),
+                            "text-muted-foreground",
+                          )}
+                        >
+                          <Pencil />
+                        </Link>
+                        <DeleteButton
+                          action={deleteEggSaleAction.bind(null, sale.id)}
+                          confirmMessage={t("common.confirmDelete")}
+                          label={t("eggs.sales.deleteAria")}
+                        />
+                      </div>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

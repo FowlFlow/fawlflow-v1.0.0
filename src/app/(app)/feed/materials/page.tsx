@@ -13,7 +13,9 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { SectionNav } from "@/components/section-nav";
+import { DeleteButton } from "@/components/delete-button";
 import { getT } from "@/lib/i18n/server";
+import { deactivateMaterialAction } from "./actions";
 
 export default async function MaterialsPage() {
   const { t } = await getT();
@@ -70,16 +72,23 @@ export default async function MaterialsPage() {
                       </span>
                     )}
                   </p>
-                  <Link
-                    href={`/feed/materials/${material.id}/edit`}
-                    aria-label={t("feed.materials.editTitle")}
-                    className={cn(
-                      buttonVariants({ variant: "ghost", size: "icon-lg" }),
-                      "shrink-0 text-muted-foreground",
-                    )}
-                  >
-                    <Pencil />
-                  </Link>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <Link
+                      href={`/feed/materials/${material.id}/edit`}
+                      aria-label={t("feed.materials.editTitle")}
+                      className={cn(
+                        buttonVariants({ variant: "ghost", size: "icon-lg" }),
+                        "text-muted-foreground",
+                      )}
+                    >
+                      <Pencil />
+                    </Link>
+                    <DeleteButton
+                      action={deactivateMaterialAction.bind(null, material.id)}
+                      confirmMessage={t("common.confirmDelete")}
+                      label={t("feed.materials.deactivateAria")}
+                    />
+                  </div>
                 </div>
                 <div className="mt-2 flex items-center justify-between text-sm">
                   <span
@@ -134,16 +143,23 @@ export default async function MaterialsPage() {
                       Rs. {material.defaultSellPricePerKg.toString()}/kg
                     </TableCell>
                     <TableCell>
-                      <Link
-                        href={`/feed/materials/${material.id}/edit`}
-                        aria-label={t("feed.materials.editTitle")}
-                        className={cn(
-                          buttonVariants({ variant: "ghost", size: "icon-lg" }),
-                          "text-muted-foreground",
-                        )}
-                      >
-                        <Pencil />
-                      </Link>
+                      <div className="flex justify-end gap-1">
+                        <Link
+                          href={`/feed/materials/${material.id}/edit`}
+                          aria-label={t("feed.materials.editTitle")}
+                          className={cn(
+                            buttonVariants({ variant: "ghost", size: "icon-lg" }),
+                            "text-muted-foreground",
+                          )}
+                        >
+                          <Pencil />
+                        </Link>
+                        <DeleteButton
+                          action={deactivateMaterialAction.bind(null, material.id)}
+                          confirmMessage={t("common.confirmDelete")}
+                          label={t("feed.materials.deactivateAria")}
+                        />
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

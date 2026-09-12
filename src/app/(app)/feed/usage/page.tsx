@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Pencil } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -11,7 +12,9 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { SectionNav } from "@/components/section-nav";
+import { DeleteButton } from "@/components/delete-button";
 import { getT } from "@/lib/i18n/server";
+import { deleteFeedUsageAction } from "./actions";
 
 export default async function UsagePage() {
   const { t } = await getT();
@@ -49,9 +52,26 @@ export default async function UsagePage() {
               <div key={usage.id} className="rounded-lg border p-4">
                 <div className="flex items-start justify-between gap-2">
                   <p className="font-medium">{usage.feedType.nameEn}</p>
-                  <p className="shrink-0 text-sm text-muted-foreground">
-                    {usage.date.toLocaleDateString()}
-                  </p>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <p className="text-sm text-muted-foreground">
+                      {usage.date.toLocaleDateString()}
+                    </p>
+                    <Link
+                      href={`/feed/usage/${usage.id}/edit`}
+                      aria-label={t("feed.usage.editAria")}
+                      className={cn(
+                        buttonVariants({ variant: "ghost", size: "icon-lg" }),
+                        "text-muted-foreground",
+                      )}
+                    >
+                      <Pencil />
+                    </Link>
+                    <DeleteButton
+                      action={deleteFeedUsageAction.bind(null, usage.id)}
+                      confirmMessage={t("common.confirmDelete")}
+                      label={t("feed.usage.deleteAria")}
+                    />
+                  </div>
                 </div>
                 <div className="mt-1 flex items-center justify-between text-sm">
                   <span>{usage.quantityKg.toString()} kg</span>
@@ -72,6 +92,7 @@ export default async function UsagePage() {
                   <TableHead>{t("feed.common.feedType")}</TableHead>
                   <TableHead>{t("common.quantity")}</TableHead>
                   <TableHead>{t("common.notes")}</TableHead>
+                  <TableHead className="text-right">{t("common.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -84,6 +105,25 @@ export default async function UsagePage() {
                     <TableCell>{usage.quantityKg.toString()} kg</TableCell>
                     <TableCell className="text-muted-foreground">
                       {usage.notes ?? "—"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-1">
+                        <Link
+                          href={`/feed/usage/${usage.id}/edit`}
+                          aria-label={t("feed.usage.editAria")}
+                          className={cn(
+                            buttonVariants({ variant: "ghost", size: "icon-lg" }),
+                            "text-muted-foreground",
+                          )}
+                        >
+                          <Pencil />
+                        </Link>
+                        <DeleteButton
+                          action={deleteFeedUsageAction.bind(null, usage.id)}
+                          confirmMessage={t("common.confirmDelete")}
+                          label={t("feed.usage.deleteAria")}
+                        />
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

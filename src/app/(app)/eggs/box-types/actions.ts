@@ -58,3 +58,15 @@ export async function saveBoxTypeAction(
     `/eggs/box-types?flash=${encodeURIComponent(id ? t("eggs.boxTypes.updated") : t("eggs.boxTypes.added"))}`,
   );
 }
+
+export async function deactivateBoxTypeAction(id: string): Promise<void> {
+  const boxType = await prisma.eggBoxType.findUnique({ where: { id } });
+  if (!boxType || !boxType.isActive) return;
+
+  await prisma.eggBoxType.update({
+    where: { id },
+    data: { isActive: false },
+  });
+
+  revalidatePath("/eggs/box-types");
+}

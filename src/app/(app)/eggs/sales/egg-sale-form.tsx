@@ -9,7 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { NativeSelect } from "@/components/ui/native-select";
 import { useActionToast } from "@/hooks/use-action-toast";
 import { useTranslations } from "@/lib/i18n/client";
-import { recordEggSaleAction, type EggSaleFormState } from "./actions";
+import { recordEggSaleAction, updateEggSaleAction, type EggSaleFormState } from "./actions";
 
 const initialState: EggSaleFormState = {};
 
@@ -17,24 +17,35 @@ export function EggSaleForm({
   boxTypes,
   buyers,
   defaultRatePerEgg,
+  sale,
 }: {
   boxTypes: { id: string; name: string; eggsPerBox: number }[];
   buyers: { id: string; name: string }[];
   defaultRatePerEgg?: number | null;
+  sale?: {
+    id: string;
+    buyerId: string;
+    date: string;
+    boxTypeId?: string;
+    boxCount: string;
+    looseEggCount: string;
+    ratePerEgg: string;
+    notes?: string;
+  };
 }) {
   const [state, formAction, pending] = useActionState(
-    recordEggSaleAction,
+    sale ? updateEggSaleAction : recordEggSaleAction,
     initialState,
   );
   useActionToast(state?.error);
   const t = useTranslations();
   const today = new Date().toISOString().slice(0, 10);
 
-  const [boxTypeId, setBoxTypeId] = useState("");
-  const [boxCount, setBoxCount] = useState("0");
-  const [looseEggCount, setLooseEggCount] = useState("0");
+  const [boxTypeId, setBoxTypeId] = useState(sale?.boxTypeId ?? "");
+  const [boxCount, setBoxCount] = useState(sale?.boxCount ?? "0");
+  const [looseEggCount, setLooseEggCount] = useState(sale?.looseEggCount ?? "0");
   const [ratePerEgg, setRatePerEgg] = useState(
-    defaultRatePerEgg != null ? defaultRatePerEgg.toString() : "",
+    sale?.ratePerEgg ?? (defaultRatePerEgg != null ? defaultRatePerEgg.toString() : ""),
   );
 
   const selectedBoxType = boxTypes.find((b) => b.id === boxTypeId);
@@ -47,6 +58,7 @@ export function EggSaleForm({
   if (state?.needsConfirmation && state.formValues) {
     return (
       <form action={formAction} className="max-w-lg space-y-4">
+        {sale && <input type="hidden" name="id" value={sale.id} />}
         <input type="hidden" name="buyerId" value={state.formValues.buyerId} />
         <input type="hidden" name="date" value={state.formValues.date} />
         <input
@@ -92,12 +104,13 @@ export function EggSaleForm({
 
   return (
     <form action={formAction} className="max-w-lg space-y-5">
+      {sale && <input type="hidden" name="id" value={sale.id} />}
       <div className="space-y-2">
         <Label htmlFor="buyerId">{t("common.buyer")}</Label>
         {buyers.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t("eggs.sales.form.noContacts")}</p>
         ) : (
-          <NativeSelect id="buyerId" name="buyerId" required defaultValue="">
+          <NativeSelect id="buyerId" name="buyerId" required defaultValue={sale?.buyerId ?? ""}>
             <option value="" disabled>
               {t("eggs.sales.selectBuyer")}
             </option>
@@ -112,7 +125,7 @@ export function EggSaleForm({
 
       <div className="space-y-2">
         <Label htmlFor="date">{t("common.date")}</Label>
-        <Input id="date" name="date" type="date" required defaultValue={today} />
+        <Input id="date" name="date" type="date" required defaultValue={sale?.date ?? today} />
       </div>
 
       <div className="space-y-4 rounded-lg border p-4">
@@ -202,7 +215,7 @@ export function EggSaleForm({
 
       <div className="space-y-2">
         <Label htmlFor="notes">{t("common.notes")}</Label>
-        <Input id="notes" name="notes" />
+        <Input id="notes" name="notes" defaultValue={sale?.notes} />
       </div>
 
       {state?.error && (
@@ -213,7 +226,11 @@ export function EggSaleForm({
 
       <Button type="submit" disabled={pending || buyers.length === 0}>
         {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-        {pending ? t("common.recording") : t("eggs.sales.recordSale")}
+        {pending
+          ? t("common.recording")
+          : sale
+            ? t("eggs.sales.saveSale")
+            : t("eggs.sales.recordSale")}
       </Button>
     </form>
   );

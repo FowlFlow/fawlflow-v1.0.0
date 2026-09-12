@@ -5,7 +5,9 @@ import { getFeedStockKg } from "@/lib/stock";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { SectionNav } from "@/components/section-nav";
+import { DeleteButton } from "@/components/delete-button";
 import { getT } from "@/lib/i18n/server";
+import { deactivateFeedTypeAction } from "./actions";
 
 export default async function FeedTypesPage() {
   const { t } = await getT();
@@ -76,16 +78,23 @@ export default async function FeedTypesPage() {
                     })}{" "}
                     kg {t("feed.common.inStockSuffix")}
                   </p>
-                  <Link
-                    href={`/feed/types/${feedType.id}/edit`}
-                    aria-label={t("feed.types.editTitle")}
-                    className={cn(
-                      buttonVariants({ variant: "ghost", size: "icon-lg" }),
-                      "text-muted-foreground",
-                    )}
-                  >
-                    <Pencil />
-                  </Link>
+                  <div className="flex justify-end gap-1">
+                    <Link
+                      href={`/feed/types/${feedType.id}/edit`}
+                      aria-label={t("feed.types.editTitle")}
+                      className={cn(
+                        buttonVariants({ variant: "ghost", size: "icon-lg" }),
+                        "text-muted-foreground",
+                      )}
+                    >
+                      <Pencil />
+                    </Link>
+                    <DeleteButton
+                      action={deactivateFeedTypeAction.bind(null, feedType.id)}
+                      confirmMessage={t("common.confirmDelete")}
+                      label={t("feed.types.deactivateAria")}
+                    />
+                  </div>
                 </div>
               </div>
               {feedType.recipeItems.length > 0 && (
