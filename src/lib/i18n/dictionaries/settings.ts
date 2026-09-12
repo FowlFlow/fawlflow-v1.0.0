@@ -91,30 +91,11 @@ export const settingsSi: Dict = {
       updated: "වාරය Update කරන ලදී.",
     },
   },
-  changePassword: {
-    title: "මුරපදය වෙනස් කරන්න",
-    currentPassword: "වත්මන් මුරපදය",
-    newPassword: "නව මුරපදය",
-    confirmPassword: "නව මුරපදය Confirm කරන්න",
-    toastSuccess: "මුරපදය වෙනස් කරන ලදී.",
-    errors: {
-      currentRequired: "ඔබේ වත්මන් මුරපදය ඇතුළත් කරන්න",
-      tooShort: "නව මුරපදය අවම වශයෙන් අක්ෂර 8ක් තිබිය යුතුය",
-      mismatch: "නව මුරපද දෙක නොගැලපේ",
-      checkForm: "කරුණාකර පෝරමය පරීක්ෂා කරන්න.",
-      currentIncorrect: "වත්මන් මුරපදය වැරදිය.",
-    },
-  },
-  recoveryCode: {
-    title: "ප්‍රතිසාධන කේතය",
-    description:
-      "ඔබ කිසි විටෙක ගිණුමෙන් අවහිර වුවහොත් 'මුරපදය අමතකද?' තිරයේදී මෙය භාවිත වේ. නව කේතයක් උත්පාදනය කිරීම වහාම පැරණි කේතය අවලංගු කරයි.",
-    newCodeLabel:
-      "නව ප්‍රතිසාධන කේතය (මෙය දැන්ම සුරකින්න, එය නැවත පෙන්වන්නේ නැත):",
-    submit: "නව ප්‍රතිසාධන කේතයක් උත්පාදනය කරන්න",
-    generating: "උත්පාදනය කරමින්…",
-    toastGenerated: "නව ප්‍රතිසාධන කේතය උත්පාදනය කරන ලදී.",
-  },
+  // Password/account screens stay in English in both locales, matching the
+  // login page (see auth.ts) — these are the same "username/password" style
+  // fields the app owner asked to keep in English everywhere.
+  changePassword: settingsEn.changePassword,
+  recoveryCode: settingsEn.recoveryCode,
   errors: {
     notSignedIn: "ඔබ පිවිසී නොමැත.",
     userNotFound: "පරිශීලකයා හමු නොවීය.",

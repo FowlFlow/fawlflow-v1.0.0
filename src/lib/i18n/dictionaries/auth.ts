@@ -23,25 +23,9 @@ export const authEn: Dict = {
   errorInvalidRecovery: "Username or recovery code is incorrect.",
 };
 
-export const authSi: Dict = {
-  getStarted: "දැන් පටන් ගන්න",
-  userName: "පරිශීලක නම",
-  usernamePlaceholder: "නිමල් සිල්වා",
-  passwordPlaceholder: "ඔබේ මුරපදය ඇතුළත් කරන්න",
-  forgotPassword: "මුරපදය අමතකද?",
-  signingIn: "පිවිසෙමින්…",
-  signIn: "Login",
-  resetPassword: "මුරපදය නැවත සකසන්න",
-  resetPasswordDesc: "ඔබේ පරිශීලක නම, Recovery Code සහ නව මුරපදය ඇතුළත් කරන්න.",
-  recoveryCode: "Recovery Code",
-  newPassword: "නව මුරපදය",
-  resetting: "යාවත්කාල කරමින්…",
-  backToSignIn: "Login වෙත ආපසු",
-  passwordUpdated: "මුරපදය යාවත්කාල විය",
-  saveRecoveryCode:
-    "ඔබේ නව Recovery Code ආරක්ෂිතව සුරකින්න — එය නැවත පෙන්වන්නේ නැත.",
-  errorInvalidCredentials: "පරිශීලක නම හෝ මුරපදය වැරදිය.",
-  errorFillAllFields: "කරුණාකර සියලු කොටස් පුරවන්න.",
-  errorPasswordTooShort: "නව මුරපදය අවම වශයෙන් අක්ෂර 8ක් තිබිය යුතුය.",
-  errorInvalidRecovery: "පරිශීලක නම හෝ Recovery Code වැරදිය.",
-};
+// Login, forgot-password, and reset-password screens stay in English in
+// BOTH locales — account/credential screens are conventionally English in
+// Sri Lankan apps even when the rest of the UI is Sinhala (per app owner
+// request: "for login page ... username password in english ... for like
+// these places add english language").
+export const authSi: Dict = { ...authEn };
