@@ -32,8 +32,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Type-check
-        run: npx tsc --noEmit
-
+      # `next build` type-checks the whole project as part of compiling, so
+      # there's no separate `tsc --noEmit` step — it can't run standalone
+      # anyway until Next has generated its PageProps/LayoutProps ambient
+      # types, which only happens as part of `dev`/`build` itself.
       - name: Build
         run: npm run build
